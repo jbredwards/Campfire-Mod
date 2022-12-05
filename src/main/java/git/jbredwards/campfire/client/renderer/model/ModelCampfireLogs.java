@@ -2,6 +2,7 @@ package git.jbredwards.campfire.client.renderer.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import git.jbredwards.campfire.common.block.state.ItemStackProperty;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -76,7 +77,6 @@ public final class ModelCampfireLogs implements IModel
             this.forcedType = forcedType;
         }
 
-        @SuppressWarnings("ConstantConditions")
         @Nonnull
         @Override
         public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
@@ -84,23 +84,24 @@ public final class ModelCampfireLogs implements IModel
             final ItemStack type = forcedType.isEmpty() ? getType(state) : forcedType;
             if(type.isEmpty()) return bakedQuads;
 
-            //gather textures
+            //get side texture
             final IBakedModel itemModel = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(type, null, null);
             final TextureAtlasSprite sideTex = itemModel.getParticleTexture();
+
+            //get top texture
+            final List<BakedQuad> itemQuads = itemModel.getQuads(null, EnumFacing.UP, rand);
             TextureAtlasSprite topTex = sideTex;
-            if(side == null || side.getAxis().isHorizontal()) {
-                for(BakedQuad quad : itemModel.getQuads(null, EnumFacing.UP, rand)) {
-                    if(EnumFacing.UP == quad.getFace()) {
-                        topTex = quad.getSprite();
-                        break;
-                    }
+            for(BakedQuad quad : itemQuads) {
+                if(EnumFacing.UP == quad.getFace()) {
+                    topTex = quad.getSprite();
+                    break;
                 }
             }
 
             //apply textures to parent model
             final ImmutableList.Builder<BakedQuad> builder = ImmutableList.builder();
             for(BakedQuad quad : bakedQuads) {
-                TextureAtlasSprite tex = quad.getFace() != null && quad.getFace().getAxis().isHorizontal() ? topTex : sideTex;
+                TextureAtlasSprite tex = quad.getTintIndex() == 1 ? topTex : sideTex;
                 builder.add(new BakedQuadRetextured(quad, tex));
             }
 
@@ -109,7 +110,9 @@ public final class ModelCampfireLogs implements IModel
 
         @Nonnull
         ItemStack getType(@Nullable IBlockState state) {
-            return state instanceof IExtendedBlockState ? ((IExtendedBlockState)state).getValue() : ItemStack.EMPTY;
+            return state instanceof IExtendedBlockState
+                    ? ((IExtendedBlockState)state).getValue(ItemStackProperty.INSTANCE)
+                    : ItemStack.EMPTY;
         }
 
         @Override
