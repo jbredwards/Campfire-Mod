@@ -1,0 +1,64 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'https://files.minecraftforge.net/maven' }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'maven-publish'
+
+version = 'v1.0-mc1.12.2'
+group = 'git.jbredwards.bpnether'
+archivesBaseName = 'Backported-Nether'
+sourceCompatibility = targetCompatibility = '1.8'
+
+minecraft {
+    version = "1.12.2-14.23.5.2847"
+    runDir = "run"
+    mappings = "stable_39"
+    makeObfSourceJar = false
+}
+
+dependencies {
+    //fluidlogged api
+    deobfCompile "com.github.jbredwards:fluidlogged-api:${fluidlogged_api_version}"
+    //jei
+    deobfCompile "mezz.jei:jei_1.12.2:${jei_version}"
+}
+
+repositories {
+    maven { url 'https://jitpack.io' }
+    maven {
+        //location of the maven that hosts JEI files
+        name = 'Progwml6 maven'
+        url = 'http://dvs1.progwml6.com/files/maven'
+    }
+    maven {
+        //location of a maven mirror for JEI files, as a fallback
+        name = 'ModMaven'
+        url = 'modmaven.k-4u.nl'
+    }
+}
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+                
+        // replace version and mcversion
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+        
+    // copy everything else except the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
