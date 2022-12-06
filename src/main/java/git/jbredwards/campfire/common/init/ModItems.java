@@ -1,6 +1,6 @@
 package git.jbredwards.campfire.common.init;
 
-import net.minecraft.item.ItemBlock;
+import git.jbredwards.campfire.common.item.ItemCampfire;
 
 import javax.annotation.Nonnull;
 
@@ -12,5 +12,5 @@ import javax.annotation.Nonnull;
 public final class ModItems
 {
     @Nonnull
-    public static final ItemBlock CAMPFIRE = new ItemBlock(ModBlocks.CAMPFIRE);
+    public static final ItemCampfire CAMPFIRE = new ItemCampfire(ModBlocks.CAMPFIRE);
 }

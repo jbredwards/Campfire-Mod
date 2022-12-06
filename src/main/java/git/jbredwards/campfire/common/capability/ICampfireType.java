@@ -10,6 +10,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -28,11 +29,12 @@ import javax.annotation.Nullable;
 @Mod.EventBusSubscriber(modid = "campfire")
 public interface ICampfireType
 {
+    @CapabilityInject(ICampfireType.class)
     @Nonnull Capability<ICampfireType> CAPABILITY = null;
     @Nonnull ResourceLocation CAPABILITY_ID = new ResourceLocation("campfire", "type");
 
-    @Nonnull ItemStack getLog();
-    void setLog(@Nonnull ItemStack logIn);
+    @Nonnull ItemStack get();
+    void set(@Nonnull ItemStack logIn);
 
     @Nullable
     static ICampfireType get(@Nullable ICapabilityProvider provider) {
@@ -58,10 +60,10 @@ public interface ICampfireType
 
         @Nonnull
         @Override
-        public ItemStack getLog() { return log; }
+        public ItemStack get() { return log; }
 
         @Override
-        public void setLog(@Nonnull ItemStack logIn) { log = logIn; }
+        public void set(@Nonnull ItemStack logIn) { log = logIn; }
     }
 
     final class Provider implements ICapabilitySerializable<NBTBase>
@@ -95,12 +97,12 @@ public interface ICampfireType
         @Nullable
         @Override
         public NBTBase writeNBT(@Nonnull Capability<ICampfireType> capability, @Nonnull ICampfireType instance, @Nullable EnumFacing side) {
-            return instance.getLog().serializeNBT();
+            return instance.get().serializeNBT();
         }
 
         @Override
         public void readNBT(@Nonnull Capability<ICampfireType> capability, @Nonnull ICampfireType instance, @Nullable EnumFacing side, @Nullable NBTBase nbt) {
-            if(nbt instanceof NBTTagCompound) instance.setLog(new ItemStack((NBTTagCompound)nbt));
+            if(nbt instanceof NBTTagCompound) instance.set(new ItemStack((NBTTagCompound)nbt));
         }
     }
 }

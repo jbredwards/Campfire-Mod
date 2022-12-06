@@ -1,5 +1,6 @@
 package git.jbredwards.campfire.common.tileentity;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -9,6 +10,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityLockableLoot;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 
@@ -77,4 +80,9 @@ public class TileEntityCampfire extends TileEntityLockableLoot implements ITicka
     @Nonnull
     @Override
     public String getName() { return "container.campfire"; }
+
+    @Override
+    public boolean shouldRefresh(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState oldState, @Nonnull IBlockState newState) {
+        return oldState.getBlock() != newState.getBlock();
+    }
 }

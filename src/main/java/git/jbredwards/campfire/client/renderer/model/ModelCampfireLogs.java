@@ -2,6 +2,8 @@ package git.jbredwards.campfire.client.renderer.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import git.jbredwards.campfire.common.block.state.ItemStackProperty;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import net.minecraft.block.state.IBlockState;
@@ -15,11 +17,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.ICustomModelLoader;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.model.IModelState;
 import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -29,7 +33,8 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- *
+ * takes in a parent model and applies the log textures stored in the ICampfireType capability
+ * (side texture are applied to all faces, top texture is applied to faces that have a tintIndex of 1)
  * @author jbred
  *
  */
@@ -41,9 +46,7 @@ public final class ModelCampfireLogs implements IModel
 
     @Nonnull
     final ResourceLocation parent;
-    public ModelCampfireLogs(@Nonnull ResourceLocation parent) {
-        this.parent = parent;
-    }
+    ModelCampfireLogs(@Nonnull ResourceLocation parent) { this.parent = parent; }
 
     @Nonnull
     @Override
@@ -59,40 +62,44 @@ public final class ModelCampfireLogs implements IModel
     @Override
     public IModel process(@Nonnull ImmutableMap<String, String> customData) {
         if(customData.containsKey("parent")) {
+            final JsonElement element = new JsonParser().parse(customData.get("parent"));
+            if(element.isJsonPrimitive() && element.getAsJsonPrimitive().isString())
+                return new ModelCampfireLogs(new ModelResourceLocation(element.getAsString()));
 
+            FMLLog.log.fatal("Expect ModelResourceLocation, got: {}", customData.get("parent"));
         }
 
         return DEFAULT;
     }
 
-    public static final class BakedModel implements IBakedModel
+    static final class BakedModel extends BakedModelWrapper<IBakedModel>
     {
         @Nonnull final Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter;
-        @Nonnull final IBakedModel parentModel;
         @Nonnull final ItemStack forcedType;
 
-        public BakedModel(@Nonnull Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter, @Nonnull IBakedModel parentModel, @Nonnull ItemStack forcedType) {
+        BakedModel(@Nonnull Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter, @Nonnull IBakedModel originalModel, @Nonnull ItemStack forcedType) {
+            super(originalModel);
             this.bakedTextureGetter = bakedTextureGetter;
-            this.parentModel = parentModel;
             this.forcedType = forcedType;
         }
 
         @Nonnull
         @Override
         public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
-            final List<BakedQuad> bakedQuads = parentModel.getQuads(state, side, rand);
-            final ItemStack type = forcedType.isEmpty() ? getType(state) : forcedType;
-            if(type.isEmpty()) return bakedQuads;
+            final ItemStack type = forcedType.isEmpty() && state instanceof IExtendedBlockState ? ((IExtendedBlockState)state).getValue(ItemStackProperty.INSTANCE) : forcedType;
+            final List<BakedQuad> bakedQuads = originalModel.getQuads(state, side, rand);
+            if(type == null || type.isEmpty()) return bakedQuads;
 
             //get side texture
             final IBakedModel itemModel = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(type, null, null);
             final TextureAtlasSprite sideTex = itemModel.getParticleTexture();
 
             //get top texture
-            final List<BakedQuad> itemQuads = itemModel.getQuads(null, EnumFacing.UP, rand);
+            final List<BakedQuad> itemQuads = new ArrayList<>();
+            for(EnumFacing facing : EnumFacing.values()) itemQuads.addAll(itemModel.getQuads(null, facing, 0));
             TextureAtlasSprite topTex = sideTex;
             for(BakedQuad quad : itemQuads) {
-                if(EnumFacing.UP == quad.getFace()) {
+                if(sideTex != quad.getSprite()) {
                     topTex = quad.getSprite();
                     break;
                 }
@@ -109,35 +116,14 @@ public final class ModelCampfireLogs implements IModel
         }
 
         @Nonnull
-        ItemStack getType(@Nullable IBlockState state) {
-            return state instanceof IExtendedBlockState
-                    ? ((IExtendedBlockState)state).getValue(ItemStackProperty.INSTANCE)
-                    : ItemStack.EMPTY;
-        }
-
-        @Override
-        public boolean isAmbientOcclusion() { return parentModel.isAmbientOcclusion(); }
-
-        @Override
-        public boolean isGui3d() { return false; }
-
-        @Override
-        public boolean isBuiltInRenderer() { return false; }
-
-        @Nonnull
-        @Override
-        public TextureAtlasSprite getParticleTexture() { return parentModel.getParticleTexture(); }
-
-        @Nonnull
         @Override
         public ItemOverrideList getOverrides() {
             return new ItemOverrideList(Collections.emptyList()) {
                 @Nonnull
                 @Override
-                public IBakedModel handleItemState(@Nonnull IBakedModel originalModel, @Nonnull ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entity) {
-                    if(!(originalModel instanceof BakedModel)) return originalModel;
+                public IBakedModel handleItemState(@Nonnull IBakedModel originalModelIn, @Nonnull ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entity) {
                     final @Nullable ICampfireType type = ICampfireType.get(stack);
-                    return type != null ? new BakedModel(bakedTextureGetter, parentModel, type.getLog()) : originalModel;
+                    return type != null ? new BakedModel(bakedTextureGetter, originalModel, type.get()) : originalModelIn;
                 }
             };
         }
