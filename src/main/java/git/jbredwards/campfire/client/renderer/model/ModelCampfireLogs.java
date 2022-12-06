@@ -55,7 +55,7 @@ public final class ModelCampfireLogs implements IModel
     @Nonnull
     @Override
     public IBakedModel bake(@Nonnull IModelState state, @Nonnull VertexFormat format, @Nonnull Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter) {
-        return new BakedModel(bakedTextureGetter, ModelLoaderRegistry.getModelOrLogError(parent, "Couldn't load Campfire log model dependency: " + parent).bake(state, format, bakedTextureGetter), ItemStack.EMPTY);
+        return new BakedModel(ModelLoaderRegistry.getModelOrLogError(parent, "Couldn't load Campfire log model dependency: " + parent).bake(state, format, bakedTextureGetter), ItemStack.EMPTY);
     }
 
     @Nonnull
@@ -74,13 +74,11 @@ public final class ModelCampfireLogs implements IModel
 
     static final class BakedModel extends BakedModelWrapper<IBakedModel>
     {
-        @Nonnull final Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter;
-        @Nonnull final ItemStack forcedType;
-
-        BakedModel(@Nonnull Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter, @Nonnull IBakedModel originalModel, @Nonnull ItemStack forcedType) {
+        @Nonnull
+        final ItemStack forcedType;
+        BakedModel(@Nonnull IBakedModel originalModel, @Nonnull ItemStack forcedTypeIn) {
             super(originalModel);
-            this.bakedTextureGetter = bakedTextureGetter;
-            this.forcedType = forcedType;
+            forcedType = forcedTypeIn;
         }
 
         @Nonnull
@@ -123,7 +121,7 @@ public final class ModelCampfireLogs implements IModel
                 @Override
                 public IBakedModel handleItemState(@Nonnull IBakedModel originalModelIn, @Nonnull ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entity) {
                     final @Nullable ICampfireType type = ICampfireType.get(stack);
-                    return type != null ? new BakedModel(bakedTextureGetter, originalModel, type.get()) : originalModelIn;
+                    return type != null ? new BakedModel(originalModel, type.get()) : originalModelIn;
                 }
             };
         }

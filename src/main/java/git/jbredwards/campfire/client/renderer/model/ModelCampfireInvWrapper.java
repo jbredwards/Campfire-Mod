@@ -73,9 +73,9 @@ public final class ModelCampfireInvWrapper implements IModel
     {
         @Nonnull
         final ImmutableMap<ItemCameraTransforms.TransformType, TRSRTransformation> cameraTransforms;
-        BakedModel(@Nonnull IBakedModel originalModel, @Nonnull ImmutableMap<ItemCameraTransforms.TransformType, TRSRTransformation> cameraTransforms) {
+        BakedModel(@Nonnull IBakedModel originalModel, @Nonnull ImmutableMap<ItemCameraTransforms.TransformType, TRSRTransformation> cameraTransformsIn) {
             super(originalModel);
-            this.cameraTransforms = cameraTransforms;
+            cameraTransforms = cameraTransformsIn;
         }
 
         @Nonnull
