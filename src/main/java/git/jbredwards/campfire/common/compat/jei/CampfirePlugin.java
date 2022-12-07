@@ -1,15 +1,15 @@
 package git.jbredwards.campfire.common.compat.jei;
 
+import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.compat.jei.category.CampfireCategory;
 import git.jbredwards.campfire.common.compat.jei.recipe.CampfireRecipeWrapper;
 import git.jbredwards.campfire.common.init.ModItems;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipeHandler;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipe;
-import mezz.jei.api.IModPlugin;
-import mezz.jei.api.IModRegistry;
-import mezz.jei.api.JEIPlugin;
+import mezz.jei.api.*;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
 
@@ -23,14 +23,28 @@ public final class CampfirePlugin implements IModPlugin
 {
     @Override
     public void register(@Nonnull IModRegistry registry) {
-        registry.handleRecipes(CampfireRecipe.class, r -> new CampfireRecipeWrapper(r.inputs, r.output, r.cookTime, r.experience), CampfireCategory.NAME);
+        registry.handleRecipes(CampfireRecipe.class, CampfireRecipeWrapper::new, CampfireCategory.NAME);
         registry.addRecipes(CampfireRecipeHandler.getAll(), CampfireCategory.NAME);
-        //campfire can be used for its recipes
-        registry.addRecipeCatalyst(new ItemStack(ModItems.CAMPFIRE), CampfireCategory.NAME);
+
+        final ItemStack campfire = new ItemStack(ModItems.CAMPFIRE, 1, OreDictionary.WILDCARD_VALUE);
+        registry.addRecipeCatalyst(campfire, CampfireCategory.NAME);
+    }
+
+    @Override
+    public void registerItemSubtypes(@Nonnull ISubtypeRegistry registry) {
+        registry.registerSubtypeInterpreter(ModItems.CAMPFIRE, stack -> {
+            final ICampfireType type = ICampfireType.get(stack);
+            return type != null ? type.get().serializeNBT().toString() : "";
+        });
     }
 
     @Override
     public void registerCategories(@Nonnull IRecipeCategoryRegistration registry) {
         registry.addRecipeCategories(CampfireCategory.getOrBuildInstance(registry.getJeiHelpers().getGuiHelper()));
+    }
+
+    @Override
+    public void onRuntimeAvailable(@Nonnull IJeiRuntime jeiRuntime) {
+        CampfireCategory.catalysts.addAll(jeiRuntime.getRecipeRegistry().getRecipeCatalysts(CampfireCategory.instance));
     }
 }

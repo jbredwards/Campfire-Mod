@@ -25,7 +25,7 @@ import javax.annotation.Nonnull;
  *
  */
 @Mod.EventBusSubscriber(modid = "campfire")
-public final class RegistryHandler
+final class RegistryHandler
 {
     @SubscribeEvent
     static void registerBlock(@Nonnull RegistryEvent.Register<Block> event) {

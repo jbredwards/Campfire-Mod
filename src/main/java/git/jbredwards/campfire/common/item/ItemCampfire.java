@@ -4,6 +4,7 @@ import git.jbredwards.campfire.common.capability.ICampfireType;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
@@ -42,6 +43,16 @@ public class ItemCampfire extends ItemBlock
         }
 
         return false;
+    }
+
+    @Nonnull
+    public static ItemStack applyType(@Nonnull Block campfire, @Nonnull ItemStack type) {
+        return applyType(new ItemStack(campfire), type);
+    }
+
+    @Nonnull
+    public static ItemStack applyType(@Nonnull Item campfire, @Nonnull ItemStack type) {
+        return applyType(new ItemStack(campfire), type);
     }
 
     @Nonnull

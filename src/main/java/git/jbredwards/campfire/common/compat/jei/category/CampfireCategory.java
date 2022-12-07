@@ -3,6 +3,7 @@ package git.jbredwards.campfire.common.compat.jei.category;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.compat.jei.recipe.CampfireRecipeWrapper;
 import git.jbredwards.campfire.common.init.ModItems;
 import mezz.jei.api.IGuiHelper;
@@ -16,8 +17,11 @@ import mezz.jei.plugins.vanilla.furnace.FurnaceRecipeCategory;
 import mezz.jei.util.Translator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -31,23 +35,23 @@ public class CampfireCategory extends FurnaceRecipeCategory<CampfireRecipeWrappe
     @Nonnull public final LoadingCache<Integer, IDrawableAnimated> cachedArrows;
     @Nonnull public final IDrawable background, icon;
 
+    public static final List<Object> catalysts = new ArrayList<>();
     public static CampfireCategory instance;
+
     protected CampfireCategory(@Nonnull IGuiHelper guiHelper) {
         super(guiHelper);
         cachedArrows = CacheBuilder.newBuilder()
-                .maximumSize(25)
-                .build(new CacheLoader<Integer, IDrawableAnimated>() {
-                    @Override
-                    public IDrawableAnimated load(@Nonnull Integer cookTime) {
-                        return guiHelper.drawableBuilder(Constants.RECIPE_GUI_VANILLA, 82, 128, 24, 17)
-                                .buildAnimated(cookTime, IDrawableAnimated.StartDirection.LEFT, false);
-                    }
-                });
+        .maximumSize(25)
+        .build(new CacheLoader<Integer, IDrawableAnimated>() {
+            @Override
+            public IDrawableAnimated load(@Nonnull Integer cookTime) {
+                return guiHelper.drawableBuilder(Constants.RECIPE_GUI_VANILLA, 82, 128, 24, 17)
+                    .buildAnimated(cookTime, IDrawableAnimated.StartDirection.LEFT, false);
+            }
+        });
 
         icon = guiHelper.createDrawableIngredient(new ItemStack(ModItems.CAMPFIRE));
-        background = guiHelper.drawableBuilder(Constants.RECIPE_GUI_VANILLA, 0, 186, 82, 34)
-                .addPadding(0, 10, 0, 0)
-                .build();
+        background = guiHelper.createDrawable(Constants.RECIPE_GUI_VANILLA, 0, 114, 82, 54);
     }
 
     @Nonnull
@@ -76,13 +80,31 @@ public class CampfireCategory extends FurnaceRecipeCategory<CampfireRecipeWrappe
     public IDrawable getIcon() { return icon; }
 
     @Override
-    public void drawExtras(@Nonnull Minecraft minecraft) { animatedFlame.draw(minecraft, 1, 20); }
+    public void drawExtras(@Nonnull Minecraft minecraft) {
+        staticFlame.draw(minecraft, 1, 20);
+    }
 
     @Override
     public void setRecipe(@Nonnull IRecipeLayout recipeLayout, @Nonnull CampfireRecipeWrapper recipeWrapper, @Nonnull IIngredients ingredients) {
         final IGuiItemStackGroup guiItemStacks = recipeLayout.getItemStacks();
         guiItemStacks.init(inputSlot, true, 0, 0);
-        guiItemStacks.init(outputSlot, false, 60, 8);
+        guiItemStacks.init(outputSlot, false, 60, 18);
         guiItemStacks.set(ingredients);
+
+        final List<ItemStack> campfires = new ArrayList<>();
+        for(Object catalyst : catalysts) {
+            if(catalyst instanceof ItemStack) {
+                final ICampfireType type = ICampfireType.get((ItemStack)catalyst);
+                if(type != null) for(ItemStack campfireType : recipeWrapper.campfireTypes) {
+                    if(ItemHandlerHelper.canItemStacksStack(type.get(), campfireType)) {
+                        campfires.add((ItemStack)catalyst);
+                        break;
+                    }
+                }
+            }
+        }
+
+        guiItemStacks.init(fuelSlot, false, 0, 36);
+        guiItemStacks.set(fuelSlot, campfires);
     }
 }

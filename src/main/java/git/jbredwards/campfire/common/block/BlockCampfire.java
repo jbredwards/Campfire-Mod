@@ -2,6 +2,7 @@ package git.jbredwards.campfire.common.block;
 
 import git.jbredwards.campfire.common.block.state.ItemStackProperty;
 import git.jbredwards.campfire.common.capability.ICampfireType;
+import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.item.ItemCampfire;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
 import git.jbredwards.fluidlogged_api.api.block.IFluidloggable;
@@ -155,15 +156,14 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
 
     @Override
     public void getSubBlocks(@Nonnull CreativeTabs itemIn, @Nonnull NonNullList<ItemStack> items) {
-        for(int i = 0; i < 4; i++) //testing with vanilla logs
-            items.add(ItemCampfire.applyType(new ItemStack(this), new ItemStack(Blocks.LOG, 1, i)));
+        CampfireConfigHandler.getAllTypes().forEach(type -> items.add(ItemCampfire.applyType(this, type)));
     }
 
     @Nonnull
     @Override
     public ItemStack getItem(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
         final ICampfireType type = ICampfireType.get(worldIn.getTileEntity(pos));
-        return type != null ? ItemCampfire.applyType(new ItemStack(this), type.get()) : new ItemStack(this);
+        return type != null ? ItemCampfire.applyType(this, type.get()) : new ItemStack(this);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -181,7 +181,7 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
         //ensure silk touch drop captures type stored in tile entity
         if(canSilkHarvest(worldIn, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0) {
             final List<ItemStack> drops = new ArrayList<>();
-            drops.add(ItemCampfire.applyType(new ItemStack(this), type.get()));
+            drops.add(ItemCampfire.applyType(this, type.get()));
 
             ForgeEventFactory.fireBlockHarvesting(drops, worldIn, pos, state, 0, 1, true, player);
             drops.forEach(drop -> spawnAsEntity(worldIn, pos, drop));

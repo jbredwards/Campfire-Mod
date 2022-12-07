@@ -1,14 +1,11 @@
 package git.jbredwards.campfire.common.recipe.campfire;
 
-import com.google.common.collect.ImmutableList;
+import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  *
@@ -18,29 +15,33 @@ import java.util.Optional;
 public final class CampfireRecipeHandler
 {
     @Nonnull
-    protected static final Map<ResourceLocation, CampfireRecipe> RECIPES = new HashMap<>();
+    static final List<CampfireRecipe> RECIPES = new ArrayList<>();
 
     @Nonnull
-    public static Optional<CampfireRecipe> getRecipeFromInput(@Nonnull ItemStack in) {
+    public static Optional<CampfireRecipe> getFromInput(@Nonnull ItemStack in) {
         if(in.isEmpty()) return Optional.empty();
-        for(CampfireRecipe recipe : RECIPES.values())
+        for(CampfireRecipe recipe : RECIPES)
             if(recipe.canAccept(in)) return Optional.of(recipe);
 
         return Optional.empty();
     }
 
-    public static void removeRecipe(@Nonnull ResourceLocation id) { RECIPES.remove(id); }
-    public static void createRecipe(@Nonnull ResourceLocation id, @Nonnull List<ItemStack> inputs, @Nonnull ItemStack output, int cookTime, float experience) {
-        //do nothing if the item can already be used for a different recipe
-        for(ItemStack input : inputs) {
-            final Optional<CampfireRecipe> recipe = getRecipeFromInput(input);
-            if(recipe.isPresent()) return;
-        }
+    public static void removeInput(@Nonnull ItemStack in) { getFromInput(in).ifPresent(RECIPES::remove); }
+    public static void removeOutput(@Nonnull ItemStack out) {
+        RECIPES.removeIf(recipe -> ItemHandlerHelper.canItemStacksStack(out, recipe.output));
+    }
 
-        final CampfireRecipe recipe = new CampfireRecipe(id, inputs, output, cookTime, experience);
-        RECIPES.put(recipe.id, recipe);
+    public static void createRecipe(@Nonnull List<ItemStack> inputs, @Nonnull ItemStack output, int cookTime, float experience) {
+        createRecipe(CampfireConfigHandler.getAllTypes(), inputs, output, cookTime, experience);
+    }
+
+    public static void createRecipe(@Nonnull List<ItemStack> campfireTypes, @Nonnull List<ItemStack> inputs, @Nonnull ItemStack output, int cookTime, float experience) {
+        if(!output.isEmpty()) {
+            inputs.forEach(CampfireRecipeHandler::removeInput);
+            RECIPES.add(new CampfireRecipe(campfireTypes, inputs, output, cookTime, experience));
+        }
     }
 
     @Nonnull
-    public static List<CampfireRecipe> getAll() { return ImmutableList.copyOf(RECIPES.values()); }
+    public static List<CampfireRecipe> getAll() { return Collections.unmodifiableList(RECIPES); }
 }

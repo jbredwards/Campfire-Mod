@@ -33,6 +33,7 @@ public interface ICampfireType
     @Nonnull Capability<ICampfireType> CAPABILITY = null;
     @Nonnull ResourceLocation CAPABILITY_ID = new ResourceLocation("campfire", "type");
 
+    //do not mutate!
     @Nonnull ItemStack get();
     void set(@Nonnull ItemStack logIn);
 
