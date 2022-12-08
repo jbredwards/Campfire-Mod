@@ -31,6 +31,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.init.*;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFireball;
 import net.minecraft.item.ItemFlintAndSteel;
@@ -166,6 +167,17 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
         return type != null ? ItemCampfire.applyType(this, type.get()) : new ItemStack(this);
     }
 
+    @Override
+    public void breakBlock(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
+        final TileEntity tile = worldIn.getTileEntity(pos);
+        if(tile instanceof TileEntityCampfire) ((TileEntityCampfire)tile).slotInfo.forEach(slot -> {
+            if(!slot.stack.isEmpty())
+                InventoryHelper.spawnItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), slot.stack);
+        });
+
+        super.breakBlock(worldIn, pos, state);
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Override
     public void harvestBlock(@Nonnull World worldIn, @Nonnull EntityPlayer player, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nullable TileEntity te, @Nonnull ItemStack stack) {
@@ -267,6 +279,11 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
                 }
             }
         }
+    }
+
+    @Override
+    public boolean isBurning(@Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
+        return CampfireConfigHandler.isBurningBlock && world.getBlockState(pos).getValue(LIT);
     }
 
     @Override

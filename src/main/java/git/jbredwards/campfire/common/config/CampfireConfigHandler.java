@@ -23,6 +23,9 @@ import java.util.Map;
 @Config(modid = "campfire")
 public final class CampfireConfigHandler
 {
+    @Config.LangKey("config.campfire.isBurningBlock")
+    public static boolean isBurningBlock;
+
     @Nonnull
     static final List<ItemStack> TYPES = new ArrayList<>();
 
