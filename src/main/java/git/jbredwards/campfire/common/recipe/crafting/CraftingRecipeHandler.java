@@ -23,8 +23,6 @@ import javax.annotation.Nonnull;
 @Mod.EventBusSubscriber(modid = "campfire")
 final class CraftingRecipeHandler
 {
-    static int recipesRegistered;
-
     @SubscribeEvent
     static void registerRecipes(@Nonnull RegistryEvent.Register<IRecipe> event) {
         CampfireConfigHandler.buildTypes();
@@ -36,8 +34,9 @@ final class CraftingRecipeHandler
                         " S ", "SCS", "LLL",
                         'S', "stickWood",
                         'C', new ItemStack(Items.COAL, 1, OreDictionary.WILDCARD_VALUE),
-                        'L', type
-                ).setRegistryName("campfire", "campfire_id_" + recipesRegistered++)
+                        'L', type)
+                        .setRegistryName("campfire", String.format("campfire.%s.%s",
+                        type.getItem().getCreatorModId(type), type.getTranslationKey()))
             );
         });
     }

@@ -9,6 +9,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -24,14 +25,21 @@ public class ItemCampfire extends ItemBlock
 
     @Nonnull
     @Override
-    public String getTranslationKey(@Nonnull ItemStack stack) {
-        final ICampfireType type = ICampfireType.get(stack);
-        if(type != null) {
-            final String typeTranslation = type.get().getTranslationKey();
-
+    public String getItemStackDisplayName(@Nonnull ItemStack stack) {
+        final ICampfireType cap = ICampfireType.get(stack);
+        if(cap != null) {
+            final ItemStack type = cap.get();
+            //if a defined special case exists in .lang file, use that instead of auto generating a name
+            final String specialCase = String.format("%s.type.%s.name", stack.getTranslationKey(), type.getTranslationKey());
+            if(I18n.canTranslate(specialCase)) return I18n.translateToLocal(specialCase);
+            //auto generate a name
+            return type.getDisplayName().replaceFirst(
+                    I18n.translateToLocal("regex.campfire.target"),
+                    I18n.translateToLocal("regex.campfire.replacement"));
         }
 
-        return super.getTranslationKey(stack);
+        //should never pass
+        return super.getItemStackDisplayName(stack);
     }
 
     @Override

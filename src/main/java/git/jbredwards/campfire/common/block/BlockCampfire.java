@@ -51,7 +51,6 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -117,9 +116,10 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
     public boolean onBlockActivated(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer playerIn, @Nonnull EnumHand hand, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ) {
         final ItemStack stack = playerIn.getHeldItem(hand);
 
-        if(handleItems(worldIn, pos, state, playerIn, stack, hitX, hitY, hitZ)) return true;
+        if(handleItems(worldIn, pos, state, playerIn, stack, hitX, hitY, hitZ, true)) return true;
         else if(handleFireIgnite(worldIn, pos, state, playerIn, stack)) return true;
-        else return handleFireExtinguish(worldIn, pos, state, playerIn, stack);
+        else if(handleFireExtinguish(worldIn, pos, state, playerIn, stack)) return true;
+        else return handleItems(worldIn, pos, state, playerIn, stack, hitX, hitY, hitZ, false);
     }
 
     //============
@@ -200,7 +200,7 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
     //HANDLE ITEM COOKING
     //===================
 
-    public boolean handleItems(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer playerIn, @Nonnull ItemStack stack, float hitX, float hitY, float hitZ) {
+    public boolean handleItems(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer playerIn, @Nonnull ItemStack stack, float hitX, float hitY, float hitZ, boolean checkRecipe) {
         //TODO
         return false;
     }
@@ -228,11 +228,6 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
     //===========
     //HANDLE FIRE
     //===========
-
-    @SubscribeEvent(priority = EventPriority.LOW)
-    static void punchesExtinguishFire(@Nonnull PlayerInteractEvent.LeftClickBlock event) {
-
-    }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     static void handleProjectileCollision(@Nonnull ProjectileImpactEvent event) {

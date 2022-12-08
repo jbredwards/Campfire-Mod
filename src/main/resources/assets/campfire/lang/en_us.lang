@@ -1,0 +1,9 @@
+//blocks
+tile.campfire.campfire.name=Campfire
+//regex
+regex.campfire.target=$
+regex.campfire.replacement= Campfire
+//jei
+gui.campfire.jei.category.campfire=Campfire
+gui.campfire.jei.category.campfire.cookTime=%s s
+gui.campfire.jei.category.campfire.experience=%s XP
