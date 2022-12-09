@@ -6,6 +6,7 @@ import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -22,6 +23,8 @@ import javax.annotation.Nonnull;
 @Mod(modid = "campfire", name = "Campfire", version = "1.0.0")
 public final class Campfire
 {
+    public static final boolean isFluidloggedAPI = Loader.isModLoaded("fluidlogged_api");
+
     @Mod.EventHandler
     static void preInit(@Nonnull FMLPreInitializationEvent event) {
         CapabilityManager.INSTANCE.register(ICampfireType.class, ICampfireType.Storage.INSTANCE, ICampfireType.Impl::new);

@@ -1,7 +1,9 @@
 package git.jbredwards.campfire.common.block;
 
+import git.jbredwards.campfire.Campfire;
 import git.jbredwards.campfire.common.block.state.ItemStackProperty;
 import git.jbredwards.campfire.common.capability.ICampfireType;
+import git.jbredwards.campfire.common.compat.fluidlogged_api.FluidloggedAPI;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.item.ItemCampfire;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
@@ -116,6 +118,7 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
     @Override
     public boolean onBlockActivated(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer playerIn, @Nonnull EnumHand hand, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ) {
         final ItemStack stack = playerIn.getHeldItem(hand);
+        if(!playerIn.canPlayerEdit(pos, facing, stack)) return false;
 
         if(handleItems(worldIn, pos, state, playerIn, stack, hitX, hitY, hitZ, true)) return true;
         else if(handleFireIgnite(worldIn, pos, state, playerIn, stack)) return true;
@@ -253,9 +256,8 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
                 if(potionType == PotionTypes.WATER && PotionUtils.getEffectsFromStack(potion).isEmpty()) {
                     final BlockPos pos = result.getBlockPos();
                     final IBlockState state = entity.world.getBlockState(pos);
-                    if(state.getBlock() instanceof BlockCampfire && state.getValue(LIT)) {
+                    if(state.getBlock() instanceof BlockCampfire && state.getValue(LIT))
                         ((BlockCampfire)state.getBlock()).extinguishFire(entity.world, pos, state);
-                    }
                 }
             }
             //snowballs extinguish fire
@@ -264,19 +266,17 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
                 final BlockPos pos = result.getBlockPos();
                 if(fireBB.offset(pos).contains(result.hitVec.add(new Vec3d(result.sideHit.getDirectionVec()).scale(0.1)))) {
                     final IBlockState state = entity.world.getBlockState(pos);
-                    if(state.getBlock() instanceof BlockCampfire && state.getValue(LIT)) {
+                    if(state.getBlock() instanceof BlockCampfire && state.getValue(LIT))
                         ((BlockCampfire)state.getBlock()).extinguishFire(entity.world, pos, state);
-                    }
                 }
             }
             //entities on fire ignite it
             else if(entity.isBurning()) {
                 final BlockPos pos = result.getBlockPos();
                 final IBlockState state = entity.world.getBlockState(pos);
-                if(state.getBlock() instanceof BlockCampfire && !state.getValue(LIT)) {
-                    entity.world.setBlockState(pos, state.withProperty(LIT, true));
-                    event.setCanceled(true);
-                }
+                if(state.getBlock() instanceof BlockCampfire && !state.getValue(LIT))
+                    if(((BlockCampfire)state.getBlock()).igniteFire(entity.world, pos, state))
+                        event.setCanceled(true);
             }
         }
     }
@@ -288,24 +288,26 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
 
     @Override
     public void onEntityCollision(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull Entity entityIn) {
-        if(!worldIn.isRemote && entityIn.isBurning() && !state.getValue(LIT))
-            worldIn.setBlockState(pos, state.withProperty(LIT, true));
+        if(entityIn instanceof EntityPlayer && !((EntityPlayer)entityIn).isAllowEdit()) return;
+        if(!worldIn.isRemote && entityIn.isBurning() && !state.getValue(LIT)) igniteFire(worldIn, pos, state);
     }
 
     public boolean handleFireIgnite(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer playerIn, @Nonnull ItemStack stack) {
         if(!state.getValue(LIT)) {
             if(stack.getItem() instanceof ItemFireball) {
-                worldIn.playSound(playerIn, pos, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.BLOCKS, 1, (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.2f + 1);
-                worldIn.setBlockState(pos, state.withProperty(LIT, true));
-                if(!playerIn.isCreative()) stack.shrink(1);
-                return true;
+                if(igniteFire(worldIn, pos, state)) {
+                    worldIn.playSound(playerIn, pos, SoundEvents.ITEM_FIRECHARGE_USE, SoundCategory.BLOCKS, 1, (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.2f + 1);
+                    if(!playerIn.isCreative()) stack.shrink(1);
+                    return true;
+                }
             }
 
             else if(stack.getItem() instanceof ItemFlintAndSteel) {
-                worldIn.playSound(playerIn, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, worldIn.rand.nextFloat() * 0.4f + 0.8f);
-                worldIn.setBlockState(pos, state.withProperty(LIT, true));
-                stack.damageItem(1, playerIn);
-                return true;
+                if(igniteFire(worldIn, pos, state)) {
+                    worldIn.playSound(playerIn, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, worldIn.rand.nextFloat() * 0.4f + 0.8f);
+                    stack.damageItem(1, playerIn);
+                    return true;
+                }
             }
         }
 
@@ -327,6 +329,15 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
             world.playEvent(Constants.WorldEvents.FIRE_EXTINGUISH_SOUND, pos, 0);
             world.setBlockState(pos, state.withProperty(LIT, false));
         }
+    }
+
+    public boolean igniteFire(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
+        if(!Campfire.isFluidloggedAPI || !FluidloggedAPI.isFluidlogged(world, pos)) {
+            world.setBlockState(pos, state.withProperty(LIT, true));
+            return true;
+        }
+
+        return false;
     }
 
     //=========

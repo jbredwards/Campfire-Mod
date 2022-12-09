@@ -7,6 +7,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
@@ -21,10 +25,17 @@ import java.util.Map;
  *
  */
 @Config(modid = "campfire")
+@Mod.EventBusSubscriber(modid = "campfire")
 public final class CampfireConfigHandler
 {
+    @Config.LangKey("config.campfire.emitsSmoke")
+    public static boolean emitsSmoke = true;
+
     @Config.LangKey("config.campfire.isBurningBlock")
-    public static boolean isBurningBlock;
+    public static boolean isBurningBlock = true;
+
+    @Config.LangKey("config.campfire.poweredAction")
+    @Nonnull public static PoweredAction poweredAction = PoweredAction.COLOR;
 
     @Nonnull
     static final List<ItemStack> TYPES = new ArrayList<>();
@@ -56,5 +67,17 @@ public final class CampfireConfigHandler
                 CampfireRecipeHandler.createRecipe(inputs, out, 400, FurnaceRecipes.instance().getSmeltingExperience(out));
             }
         });
+    }
+
+    @SubscribeEvent
+    static void sync(@Nonnull ConfigChangedEvent.OnConfigChangedEvent event) {
+        if(event.getModID().equals("campfire")) ConfigManager.sync("campfire", Config.Type.INSTANCE);
+    }
+
+    public enum PoweredAction
+    {
+        IGNORE,
+        COLOR,
+        DISABLE;
     }
 }
