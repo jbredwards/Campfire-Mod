@@ -35,7 +35,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.init.*;
-import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFireball;
 import net.minecraft.item.ItemFlintAndSteel;
@@ -458,6 +457,24 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
     //===============
     //BLOCK PARTICLES
     //===============
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void randomDisplayTick(@Nonnull IBlockState stateIn, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull Random rand) {
+        if(stateIn.getValue(LIT)) {
+            //ambient sounds
+            if(rand.nextInt(10) == 0) {
+
+            }
+
+            //lava particles
+            if(rand.nextInt(5) == 0) {
+                for(int i = 0; i < rand.nextInt(1) + 1; ++i) {
+                    worldIn.spawnParticle(EnumParticleTypes.LAVA, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, rand.nextFloat() / 2, 5.0E-5D, rand.nextFloat() / 2);
+                }
+            }
+        }
+    }
 
     @Override
     public boolean addLandingEffects(@Nonnull IBlockState state, @Nonnull WorldServer worldObj, @Nonnull BlockPos blockPosition, @Nonnull IBlockState iblockstate, @Nonnull EntityLivingBase entity, int amount) {

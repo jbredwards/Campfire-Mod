@@ -7,6 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
@@ -16,6 +17,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
 
@@ -36,6 +38,7 @@ final class RegistryHandler
     @SubscribeEvent
     static void registerItem(@Nonnull RegistryEvent.Register<Item> event) {
         event.getRegistry().register(ModItems.CAMPFIRE.setRegistryName("campfire"));
+        OreDictionary.registerOre("campfire", new ItemStack(ModItems.CAMPFIRE, 1, OreDictionary.WILDCARD_VALUE));
     }
 
     @SideOnly(Side.CLIENT)

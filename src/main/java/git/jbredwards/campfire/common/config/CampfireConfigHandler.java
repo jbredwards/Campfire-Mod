@@ -1,5 +1,6 @@
 package git.jbredwards.campfire.common.config;
 
+import com.google.common.collect.Lists;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipeHandler;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemFood;
@@ -63,11 +64,7 @@ public final class CampfireConfigHandler
         final Map<ItemStack, ItemStack> furnaceRecipes = FurnaceRecipes.instance().getSmeltingList();
         furnaceRecipes.forEach((in, out) -> {
             if(in.getItem() instanceof ItemFood && out.getItem() instanceof ItemFood) {
-                final NonNullList<ItemStack> inputs = NonNullList.create();
-                if(in.getMetadata() != OreDictionary.WILDCARD_VALUE) inputs.add(in);
-                else in.getItem().getSubItems(CreativeTabs.SEARCH, inputs);
-
-                CampfireRecipeHandler.createRecipe(inputs, out, 400, FurnaceRecipes.instance().getSmeltingExperience(out));
+                CampfireRecipeHandler.createRecipe(Lists.newArrayList(in), out, 400, FurnaceRecipes.instance().getSmeltingExperience(out));
             }
         });
     }

@@ -3,7 +3,6 @@ package git.jbredwards.campfire.common.tileentity;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
