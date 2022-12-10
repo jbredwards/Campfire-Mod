@@ -31,6 +31,9 @@ public final class CampfireConfigHandler
     @Config.LangKey("config.campfire.emitsSmoke")
     public static boolean emitsSmoke = true;
 
+    @Config.LangKey("config.campfire.hasExtraSlots")
+    public static boolean hasExtraSlots = true;
+
     @Config.LangKey("config.campfire.isBurningBlock")
     public static boolean isBurningBlock = true;
 

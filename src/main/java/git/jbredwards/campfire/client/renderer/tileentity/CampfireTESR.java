@@ -10,7 +10,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nonnull;
 
 /**
- *
+ * needed to register the items campfires hold
  * @author jbred
  *
  */

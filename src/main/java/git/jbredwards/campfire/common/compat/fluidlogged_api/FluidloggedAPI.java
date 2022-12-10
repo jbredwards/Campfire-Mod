@@ -7,7 +7,7 @@ import net.minecraft.world.IBlockAccess;
 import javax.annotation.Nonnull;
 
 /**
- * handles optional fluidlogged api compat
+ * handles optional fluidlogged api compat, class exists to prevent CNFE while fluidlogged api isn't installed
  * @author jbred
  *
  */

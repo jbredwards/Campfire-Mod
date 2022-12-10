@@ -1,10 +1,14 @@
 package git.jbredwards.campfire.common.tileentity;
 
+import git.jbredwards.campfire.Campfire;
+import git.jbredwards.campfire.common.message.MessageSyncCampfireSlot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -18,14 +22,21 @@ import javax.annotation.Nonnull;
  */
 public class CampfireSlotInfo implements INBTSerializable<NBTTagCompound>
 {
+    @Nonnull
+    public final TileEntityCampfire tile;
+    public final int slotIndex; //needed to sync with client
+
     public ItemStack stack = ItemStack.EMPTY, output = ItemStack.EMPTY;
     public int maxCookTime, cookTime;
     public float experience;
     public boolean isActive = true;
-    //client-side item rotation
-    public float itemRotation;
-    //relative to the TileEntity's center position
-    public double offsetX, offsetY, offsetZ;
+    public float itemRotation; //client-side item rotation
+    public double offsetX, offsetY, offsetZ; //relative to the TileEntity's center position
+
+    public CampfireSlotInfo(@Nonnull TileEntityCampfire tileIn, int slotIndexIn) {
+        tile = tileIn;
+        slotIndex = slotIndexIn;
+    }
 
     @Nonnull
     public CampfireSlotInfo setOffset(double xOffsetIn, double yOffsetIn, double zOffsetIn) {
@@ -47,6 +58,24 @@ public class CampfireSlotInfo implements INBTSerializable<NBTTagCompound>
         return this;
     }
 
+    public void cookTick() {
+        if(isActive && !output.isEmpty()) {
+            if(cookTime < maxCookTime) cookTime++;
+            else {
+                stack = output.copy();
+                output = ItemStack.EMPTY;
+                cookTime = 0;
+                maxCookTime = 0;
+                sendToTracking();
+            }
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void spawnCookParticles() {
+
+    }
+
     @SideOnly(Side.CLIENT)
     public void render() {
         if(isActive && !stack.isEmpty()) {
@@ -58,6 +87,13 @@ public class CampfireSlotInfo implements INBTSerializable<NBTTagCompound>
             Minecraft.getMinecraft().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
             GlStateManager.popMatrix();
         }
+    }
+
+    public void reset() {
+        stack = ItemStack.EMPTY;
+        output = ItemStack.EMPTY;
+        cookTime = 0;
+        maxCookTime = 0;
     }
 
     @Nonnull
@@ -79,5 +115,18 @@ public class CampfireSlotInfo implements INBTSerializable<NBTTagCompound>
         maxCookTime = Math.max(0, nbt.getInteger("maxCookTime"));
         cookTime = Math.max(0, nbt.getInteger("cookTime"));
         experience = Math.max(0, nbt.getFloat("experience"));
+    }
+
+    //utility function that sends a packet to all players tracking the TileEntity
+    public void sendToTracking() {
+        if(tile.getWorld() instanceof WorldServer) {
+            final PlayerChunkMapEntry entry = ((WorldServer)tile.getWorld()).getPlayerChunkMap()
+                    .getEntry(tile.getPos().getX() >> 4, tile.getPos().getZ() >> 4);
+
+            if(entry != null) {
+                final MessageSyncCampfireSlot message = new MessageSyncCampfireSlot(this);
+                entry.getWatchingPlayers().forEach(player -> Campfire.wrapper.sendTo(message, player));
+            }
+        }
     }
 }

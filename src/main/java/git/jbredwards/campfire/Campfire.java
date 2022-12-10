@@ -3,6 +3,8 @@ package git.jbredwards.campfire;
 import git.jbredwards.campfire.client.renderer.tileentity.CampfireTESR;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
+import git.jbredwards.campfire.common.message.MessageFallParticles;
+import git.jbredwards.campfire.common.message.MessageSyncCampfireSlot;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -10,6 +12,8 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -25,8 +29,14 @@ public final class Campfire
 {
     public static final boolean isFluidloggedAPI = Loader.isModLoaded("fluidlogged_api");
 
+    @SuppressWarnings("ConstantConditions")
+    @Nonnull public static SimpleNetworkWrapper wrapper = null;
+
     @Mod.EventHandler
     static void preInit(@Nonnull FMLPreInitializationEvent event) {
+        wrapper = NetworkRegistry.INSTANCE.newSimpleChannel("campfire");
+        wrapper.registerMessage(MessageFallParticles.Handler.INSTANCE, MessageFallParticles.class, 0, Side.CLIENT);
+        wrapper.registerMessage(MessageSyncCampfireSlot.Handler.INSTANCE, MessageSyncCampfireSlot.class, 1, Side.CLIENT);
         CapabilityManager.INSTANCE.register(ICampfireType.class, ICampfireType.Storage.INSTANCE, ICampfireType.Impl::new);
         if(event.getSide().isClient()) registerTESR();
     }

@@ -1,11 +1,13 @@
 package git.jbredwards.campfire.common.block;
 
+import com.google.common.collect.ImmutableList;
 import git.jbredwards.campfire.Campfire;
 import git.jbredwards.campfire.common.block.state.ItemStackProperty;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.compat.fluidlogged_api.FluidloggedAPI;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.item.ItemCampfire;
+import git.jbredwards.campfire.common.message.MessageFallParticles;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
 import git.jbredwards.fluidlogged_api.api.block.IFluidloggable;
 import git.jbredwards.fluidlogged_api.api.util.FluidState;
@@ -58,6 +60,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -77,7 +80,26 @@ import java.util.stream.Collectors;
 public class BlockCampfire extends BlockHorizontal implements ITileEntityProvider, IFluidloggable
 {
     @Nonnull public static final PropertyBool LIT = PropertyBool.create("lit"), POWERED = PropertyBool.create("powered");
-    @Nonnull public static final AxisAlignedBB AABB = new AxisAlignedBB(0, 0, 0, 1, 0.4375, 1);
+    @Nonnull public static final AxisAlignedBB AABB = box(0, 0, 0, 16, 7, 16);
+    @Nonnull public static final List<AxisAlignedBB>
+            X_AABB = ImmutableList.of(
+                    //ash
+                    box(0, 0, 5, 16, 1, 11),
+                    //logs
+                    box(0,  0, 1,  16, 4, 5),
+                    box(0,  0, 11, 16, 4, 15),
+                    box(1,  3, 0,  5,  7, 16),
+                    box(11, 3, 0,  15, 7, 16)
+            ),
+            Z_AABB = ImmutableList.of(
+                    //ash
+                    box(5, 0, 0, 11, 1, 16),
+                    //logs
+                    box(1,  0, 0,  5,  4, 16),
+                    box(11, 0, 0,  15, 4, 16),
+                    box(0,  3, 1,  16, 7, 5),
+                    box(0,  3, 11, 16, 7, 15)
+            );
 
     public BlockCampfire(@Nonnull Material materialIn) { this(materialIn, materialIn.getMaterialMapColor()); }
     public BlockCampfire(@Nonnull Material materialIn, @Nonnull MapColor mapColorIn) {
@@ -117,13 +139,17 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
 
     @Override
     public boolean onBlockActivated(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer playerIn, @Nonnull EnumHand hand, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ) {
-        final ItemStack stack = playerIn.getHeldItem(hand);
-        if(!playerIn.canPlayerEdit(pos, facing, stack)) return false;
+        if(!isFluidlogged(worldIn, pos)) {
+            final ItemStack stack = playerIn.getHeldItem(hand);
+            if(!playerIn.canPlayerEdit(pos, facing, stack)) return false;
 
-        if(handleItems(worldIn, pos, state, playerIn, stack, hitX, hitY, hitZ, true)) return true;
-        else if(handleFireIgnite(worldIn, pos, state, playerIn, stack)) return true;
-        else if(handleFireExtinguish(worldIn, pos, state, playerIn, stack)) return true;
-        else return handleItems(worldIn, pos, state, playerIn, stack, hitX, hitY, hitZ, false);
+            if(handleItems(worldIn, pos, state, playerIn, stack, hitX, hitY, hitZ, true)) return true;
+            else if(handleFireIgnite(worldIn, pos, state, playerIn, stack)) return true;
+            else if(handleFireExtinguish(worldIn, pos, state, playerIn, stack)) return true;
+            else return handleItems(worldIn, pos, state, playerIn, stack, hitX, hitY, hitZ, false);
+        }
+
+        return false;
     }
 
     //============
@@ -146,7 +172,7 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
     @Nonnull
     @Override
     public IBlockState getStateForPlacement(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ, int meta, @Nonnull EntityLivingBase placer) {
-        return placer.isSneaking() ? getDefaultState().withProperty(FACING, placer.getHorizontalFacing()) : getDefaultState();
+        return placer.isSneaking() ? getDefaultState() : getDefaultState().withProperty(FACING, placer.getHorizontalFacing());
     }
 
     @Override
@@ -173,10 +199,8 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
     @Override
     public void breakBlock(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
         final TileEntity tile = worldIn.getTileEntity(pos);
-        if(tile instanceof TileEntityCampfire) ((TileEntityCampfire)tile).slotInfo.forEach(slot -> {
-            if(!slot.stack.isEmpty())
-                InventoryHelper.spawnItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), slot.stack);
-        });
+        if(tile instanceof TileEntityCampfire)
+            ((TileEntityCampfire)tile).dropAllItems();
 
         super.breakBlock(worldIn, pos, state);
     }
@@ -215,7 +239,7 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
     //HANDLE ITEM COOKING
     //===================
 
-    public boolean handleItems(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer playerIn, @Nonnull ItemStack stack, float hitX, float hitY, float hitZ, boolean checkRecipe) {
+    public boolean handleItems(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer player, @Nonnull ItemStack stack, float hitX, float hitY, float hitZ, boolean checkRecipe) {
         //TODO
         return false;
     }
@@ -332,7 +356,7 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
     }
 
     public boolean igniteFire(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
-        if(!Campfire.isFluidloggedAPI || !FluidloggedAPI.isFluidlogged(world, pos)) {
+        if(!isFluidlogged(world, pos)) {
             world.setBlockState(pos, state.withProperty(LIT, true));
             return true;
         }
@@ -380,7 +404,12 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
 
     @Nonnull
     public List<AxisAlignedBB> getCollisionBoxList(@Nonnull IBlockState state) {
-        return Collections.singletonList(AABB);
+        return state.getValue(FACING).getAxis() == EnumFacing.Axis.X ? X_AABB : Z_AABB;
+    }
+
+    @Nonnull
+    protected static AxisAlignedBB box(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+        return new AxisAlignedBB(minX / 16, minY / 16, minZ / 16, maxX / 16, maxY / 16, maxZ / 16);
     }
 
     //=============================
@@ -431,8 +460,17 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
     //===============
 
     @Override
-    public boolean addLandingEffects(@Nonnull IBlockState state, @Nonnull WorldServer worldObj, @Nonnull BlockPos blockPosition, @Nonnull IBlockState iblockstate, @Nonnull EntityLivingBase entity, int numberOfParticles) {
-        return super.addLandingEffects(state, worldObj, blockPosition, iblockstate, entity, numberOfParticles);
+    public boolean addLandingEffects(@Nonnull IBlockState state, @Nonnull WorldServer worldObj, @Nonnull BlockPos blockPosition, @Nonnull IBlockState iblockstate, @Nonnull EntityLivingBase entity, int amount) {
+        final ICampfireType type = ICampfireType.get(worldObj.getTileEntity(blockPosition));
+        if(type != null) {
+            Campfire.wrapper.sendToAllAround(
+                    new MessageFallParticles(blockPosition, entity.posX, entity.posY, entity.posZ, amount),
+                    new NetworkRegistry.TargetPoint(entity.dimension, entity.posX, entity.posY, entity.posZ, 32));
+
+            return true;
+        }
+
+        return super.addLandingEffects(state, worldObj, blockPosition, iblockstate, entity, amount);
     }
 
     @Override
@@ -532,7 +570,15 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
     @Nonnull
     @Override
     public EnumActionResult onFluidFill(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState here, @Nonnull FluidState newFluid, int blockFlags) {
+        final TileEntity tile = world.getTileEntity(pos);
+        if(tile instanceof TileEntityCampfire)
+            ((TileEntityCampfire)tile).dropAllItems();
+
         extinguishFire(world, pos, here);
         return EnumActionResult.PASS;
+    }
+
+    protected boolean isFluidlogged(@Nonnull World world, @Nonnull BlockPos pos) {
+        return Campfire.isFluidloggedAPI && FluidloggedAPI.isFluidlogged(world, pos);
     }
 }
