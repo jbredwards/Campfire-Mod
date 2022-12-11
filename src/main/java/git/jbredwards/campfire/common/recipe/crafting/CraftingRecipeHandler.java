@@ -1,7 +1,7 @@
 package git.jbredwards.campfire.common.recipe.crafting;
 
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
-import git.jbredwards.campfire.common.init.ModItems;
+import git.jbredwards.campfire.common.init.CampfireItems;
 import git.jbredwards.campfire.common.item.ItemCampfire;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -26,18 +26,15 @@ final class CraftingRecipeHandler
     @SubscribeEvent
     static void registerRecipes(@Nonnull RegistryEvent.Register<IRecipe> event) {
         CampfireConfigHandler.buildTypes();
-        CampfireConfigHandler.getAllTypes().forEach(type -> {
-            event.getRegistry().register(
+        CampfireConfigHandler.getAllTypes().forEach(type -> event.getRegistry().register(
                 new ShapedOreRecipe(
                         new ResourceLocation("campfire", "Campfire"),
-                        ItemCampfire.applyType(ModItems.CAMPFIRE, type),
+                        ItemCampfire.applyType(CampfireItems.CAMPFIRE, type),
                         " S ", "SCS", "LLL",
                         'S', "stickWood",
                         'C', new ItemStack(Items.COAL, 1, OreDictionary.WILDCARD_VALUE),
                         'L', type)
                         .setRegistryName("campfire", String.format("campfire.%s.%s",
-                        type.getItem().getCreatorModId(type), type.getTranslationKey()))
-            );
-        });
+                                type.getItem().getCreatorModId(type), type.getTranslationKey()))));
     }
 }

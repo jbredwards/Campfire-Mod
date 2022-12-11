@@ -49,7 +49,7 @@ public class ParticleCampfireSmoke extends Particle
             return;
         }
 
-        setParticleTexture(textures[7 - particleAge * 8 / particleMaxAge]);
+        //setParticleTexture(textures[7 - particleAge * 8 / particleMaxAge]);
         motionY += yAccel;
         move(motionX, motionY, motionZ);
         if(posY == prevPosY) {

@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
  * @author jbred
  *
  */
-public final class ModBlocks
+public final class CampfireBlocks
 {
     @Nonnull
     public static final BlockCampfire CAMPFIRE = new BlockCampfire(Material.WOOD, MapColor.OBSIDIAN);

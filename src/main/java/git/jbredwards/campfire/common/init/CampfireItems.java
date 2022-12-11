@@ -9,8 +9,8 @@ import javax.annotation.Nonnull;
  * @author jbred
  *
  */
-public final class ModItems
+public final class CampfireItems
 {
     @Nonnull
-    public static final ItemCampfire CAMPFIRE = new ItemCampfire(ModBlocks.CAMPFIRE);
+    public static final ItemCampfire CAMPFIRE = new ItemCampfire(CampfireBlocks.CAMPFIRE);
 }

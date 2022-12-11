@@ -3,7 +3,7 @@ package git.jbredwards.campfire.common.compat.jei;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.compat.jei.category.CampfireCategory;
 import git.jbredwards.campfire.common.compat.jei.recipe.CampfireRecipeWrapper;
-import git.jbredwards.campfire.common.init.ModItems;
+import git.jbredwards.campfire.common.init.CampfireItems;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipeHandler;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipe;
 import mezz.jei.api.*;
@@ -26,13 +26,13 @@ public final class CampfirePlugin implements IModPlugin
         registry.handleRecipes(CampfireRecipe.class, CampfireRecipeWrapper::new, CampfireCategory.NAME);
         registry.addRecipes(CampfireRecipeHandler.getAll(), CampfireCategory.NAME);
 
-        final ItemStack campfire = new ItemStack(ModItems.CAMPFIRE, 1, OreDictionary.WILDCARD_VALUE);
+        final ItemStack campfire = new ItemStack(CampfireItems.CAMPFIRE, 1, OreDictionary.WILDCARD_VALUE);
         registry.addRecipeCatalyst(campfire, CampfireCategory.NAME);
     }
 
     @Override
     public void registerItemSubtypes(@Nonnull ISubtypeRegistry registry) {
-        registry.registerSubtypeInterpreter(ModItems.CAMPFIRE, stack -> {
+        registry.registerSubtypeInterpreter(CampfireItems.CAMPFIRE, stack -> {
             final ICampfireType type = ICampfireType.get(stack);
             return type != null ? type.get().serializeNBT().toString() : "";
         });

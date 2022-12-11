@@ -6,6 +6,7 @@ import git.jbredwards.campfire.common.block.state.ItemStackProperty;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.compat.fluidlogged_api.FluidloggedAPI;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
+import git.jbredwards.campfire.common.init.CampfireSounds;
 import git.jbredwards.campfire.common.item.ItemCampfire;
 import git.jbredwards.campfire.common.message.MessageFallParticles;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
@@ -104,7 +105,8 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
     public BlockCampfire(@Nonnull Material materialIn, @Nonnull MapColor mapColorIn) {
         super(materialIn, mapColorIn);
         setDefaultState(getDefaultState().withProperty(POWERED, false));
-        setSoundType(SoundType.WOOD).setHardness(2).setLightOpacity(2).setHarvestLevel("axe", 0);
+        setSoundType(SoundType.WOOD).setCreativeTab(CreativeTabs.DECORATIONS)
+                .setHardness(2).setLightOpacity(2).setHarvestLevel("axe", 0);
     }
 
     @Override
@@ -464,7 +466,7 @@ public class BlockCampfire extends BlockHorizontal implements ITileEntityProvide
         if(stateIn.getValue(LIT)) {
             //ambient sounds
             if(rand.nextInt(10) == 0) {
-
+                worldIn.playSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, CampfireSounds.CRACKLE, SoundCategory.BLOCKS, 0.5f + rand.nextFloat(), rand.nextFloat() * 0.7f + 0.6f, false);
             }
 
             //lava particles

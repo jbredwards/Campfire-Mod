@@ -5,7 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.compat.jei.recipe.CampfireRecipeWrapper;
-import git.jbredwards.campfire.common.init.ModItems;
+import git.jbredwards.campfire.common.init.CampfireItems;
 import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.IDrawable;
 import mezz.jei.api.gui.IDrawableAnimated;
@@ -50,7 +50,7 @@ public class CampfireCategory extends FurnaceRecipeCategory<CampfireRecipeWrappe
             }
         });
 
-        icon = guiHelper.createDrawableIngredient(new ItemStack(ModItems.CAMPFIRE));
+        icon = guiHelper.createDrawableIngredient(new ItemStack(CampfireItems.CAMPFIRE));
         background = guiHelper.createDrawable(Constants.RECIPE_GUI_VANILLA, 0, 114, 82, 54);
     }
 

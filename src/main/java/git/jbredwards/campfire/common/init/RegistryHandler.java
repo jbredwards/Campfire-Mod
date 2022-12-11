@@ -7,8 +7,8 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
@@ -31,14 +31,19 @@ final class RegistryHandler
 {
     @SubscribeEvent
     static void registerBlock(@Nonnull RegistryEvent.Register<Block> event) {
-        event.getRegistry().register(ModBlocks.CAMPFIRE.setCreativeTab(CreativeTabs.DECORATIONS).setRegistryName("campfire").setTranslationKey("campfire:campfire"));
+        event.getRegistry().register(CampfireBlocks.CAMPFIRE.setRegistryName("campfire").setTranslationKey("campfire:campfire"));
         TileEntity.register("campfire:campfire", TileEntityCampfire.class);
     }
 
     @SubscribeEvent
     static void registerItem(@Nonnull RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(ModItems.CAMPFIRE.setRegistryName("campfire"));
-        OreDictionary.registerOre("campfire", new ItemStack(ModItems.CAMPFIRE, 1, OreDictionary.WILDCARD_VALUE));
+        event.getRegistry().register(CampfireItems.CAMPFIRE.setRegistryName("campfire"));
+        OreDictionary.registerOre("campfire", CampfireItems.CAMPFIRE);
+    }
+
+    @SubscribeEvent
+    static void registerSounds(@Nonnull RegistryEvent.Register<SoundEvent> event) {
+        event.getRegistry().register(CampfireSounds.CRACKLE.setRegistryName("blocks.campfire.crackle"));
     }
 
     @SideOnly(Side.CLIENT)
@@ -46,7 +51,7 @@ final class RegistryHandler
     static void registerModels(@Nonnull ModelRegistryEvent event) {
         ModelLoaderRegistry.registerLoader(ModelCampfireInvWrapper.Loader.INSTANCE);
         ModelLoaderRegistry.registerLoader(ModelCampfireLogs.Loader.INSTANCE);
-        ModelLoader.setCustomModelResourceLocation(ModItems.CAMPFIRE, 0,
-                new ModelResourceLocation(String.valueOf(ModItems.CAMPFIRE.getRegistryName()), "inventory"));
+        ModelLoader.setCustomModelResourceLocation(CampfireItems.CAMPFIRE, 0,
+                new ModelResourceLocation(String.valueOf(CampfireItems.CAMPFIRE.getRegistryName()), "inventory"));
     }
 }

@@ -1,0 +1,13 @@
+{
+    "blocks.campfire.crackle":{
+        "sounds":[
+            "campfire:crackle1",
+            "campfire:crackle2",
+            "campfire:crackle3",
+            "campfire:crackle4",
+            "campfire:crackle5",
+            "campfire:crackle6"
+        ],
+        "subtitle":"subtitles.campfire.crackle"
+    }
+}
