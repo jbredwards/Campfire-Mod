@@ -5,7 +5,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -19,8 +18,7 @@ import javax.annotation.Nonnull;
  * @author jbred
  *
  */
-public class ItemCampfire extends ItemBlock
-{
+public class ItemCampfire extends ItemBlockColored {
     public ItemCampfire(@Nonnull Block block) { super(block); }
 
     @Nonnull
@@ -40,17 +38,6 @@ public class ItemCampfire extends ItemBlock
 
         //should never pass
         return super.getItemStackDisplayName(stack);
-    }
-
-    @Override
-    public boolean placeBlockAt(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull IBlockState newState) {
-        final boolean placed = super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
-        if(placed) { //ensure the block is re-rendered if broken & placed in quick succession
-            world.markBlockRangeForRenderUpdate(pos, pos);
-            return true;
-        }
-
-        return false;
     }
 
     @Nonnull

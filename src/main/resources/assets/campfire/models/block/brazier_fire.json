@@ -1,0 +1,40 @@
+{
+	"credit": "Made with Blockbench",
+	"elements": [
+		{
+			"from": [1.8, 1, 8],
+			"to": [14.2, 17, 8],
+			"shade": false,
+			"rotation": {"angle": 45, "axis": "y", "origin": [8, 8, 8], "rescale": true},
+			"faces": {
+				"north": {"uv": [1, 0, 14, 16], "texture": "#fire"},
+				"south": {"uv": [1, 0, 14, 16], "texture": "#fire"}
+			}
+		},
+		{
+			"from": [8, 1, 1.8],
+			"to": [8, 17, 14.2],
+			"shade": false,
+			"rotation": {"angle": 45, "axis": "y", "origin": [8, 8, 8], "rescale": true},
+			"faces": {
+				"east": {"uv": [1, 0, 14, 16], "texture": "#fire"},
+				"west": {"uv": [1, 0, 14, 16], "texture": "#fire"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "brazier",
+			"origin": [8, 8, 8],
+			"color": 0,
+			"children": [
+				{
+					"name": "fire",
+					"origin": [8, 8, 8],
+					"color": 0,
+					"children": [0, 1]
+				}
+			]
+		}
+	]
+}

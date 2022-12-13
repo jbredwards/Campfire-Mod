@@ -29,8 +29,11 @@ import java.util.Map;
 @Mod.EventBusSubscriber(modid = "campfire")
 public final class CampfireConfigHandler
 {
-    @Config.LangKey("config.campfire.emitsSmoke")
-    public static boolean emitsSmoke = true;
+    @Config.LangKey("config.campfire.brazierEmitsSmoke")
+    public static boolean brazierEmitsSmoke = true;
+
+    @Config.LangKey("config.campfire.campfireEmitsSmoke")
+    public static boolean campfireEmitsSmoke = true;
 
     @Config.LangKey("config.campfire.hasExtraSlots")
     public static boolean hasExtraSlots = true;

@@ -54,7 +54,7 @@ public interface ICampfireType
             event.addCapability(CAPABILITY_ID, new Provider());
     }
 
-    final class Impl implements ICampfireType
+    class Impl implements ICampfireType
     {
         @Nonnull
         ItemStack log = new ItemStack(Blocks.LOG);

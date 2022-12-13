@@ -2,11 +2,14 @@ package git.jbredwards.campfire.common.block;
 
 import com.google.common.collect.ImmutableList;
 import git.jbredwards.campfire.Campfire;
+import git.jbredwards.campfire.common.block.state.ColorProperty;
 import git.jbredwards.campfire.common.block.state.ItemStackProperty;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
+import git.jbredwards.campfire.common.item.ItemBlockColored;
 import git.jbredwards.campfire.common.item.ItemCampfire;
 import git.jbredwards.campfire.common.message.MessageFallParticles;
+import git.jbredwards.campfire.common.tileentity.AbstractCampfireTE;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
 import git.jbredwards.fluidlogged_api.api.util.FluidState;
 import net.minecraft.block.SoundType;
@@ -112,7 +115,8 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
     @Nonnull
     @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer.Builder(this).add(X_AXIS, SIGNAL, LIT, POWERED).add(ItemStackProperty.INSTANCE).build();
+        return new BlockStateContainer.Builder(this).add(X_AXIS, SIGNAL, LIT, POWERED)
+                .add(ColorProperty.INSTANCE, ItemStackProperty.INSTANCE).build();
     }
 
     @Nonnull
@@ -162,7 +166,11 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
     public void onBlockPlacedBy(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityLivingBase placer, @Nonnull ItemStack stack) {
         final ICampfireType stackCap = ICampfireType.get(stack);
         if(stackCap != null) {
-            final ICampfireType tileCap = ICampfireType.get(worldIn.getTileEntity(pos));
+            final @Nullable TileEntity tile = worldIn.getTileEntity(pos);
+            if(tile instanceof AbstractCampfireTE && ((AbstractCampfireTE)tile).color == -1)
+                ((AbstractCampfireTE)tile).color = ItemBlockColored.getColor(stack);
+
+            final ICampfireType tileCap = ICampfireType.get(tile);
             if(tileCap != null) tileCap.set(stackCap.get());
         }
     }
@@ -176,7 +184,9 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
     @Override
     public ItemStack getItem(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
         final ICampfireType type = ICampfireType.get(worldIn.getTileEntity(pos));
-        return type != null ? ItemCampfire.applyType(this, type.get()) : new ItemStack(this);
+        final ItemStack stack = super.getItem(worldIn, pos, state);
+
+        return type != null ? ItemCampfire.applyType(stack, type.get()) : stack;
     }
 
     @Override
@@ -203,9 +213,10 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
         //ensure silk touch drop captures type stored in tile entity
         if(canSilkHarvest(worldIn, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0) {
             final List<ItemStack> drops = new ArrayList<>();
-            drops.add(ItemCampfire.applyType(this, type.get()));
 
+            drops.add(ItemBlockColored.applyColor(ItemCampfire.applyType(this, type.get()), ((AbstractCampfireTE)te).color));
             ForgeEventFactory.fireBlockHarvesting(drops, worldIn, pos, state, 0, 1, true, player);
+
             drops.forEach(drop -> spawnAsEntity(worldIn, pos, drop));
         }
 
@@ -256,7 +267,11 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
     @Override
     public IBlockState getExtendedState(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
         if(state instanceof IExtendedBlockState) {
-            final @Nullable ICampfireType type = ICampfireType.get(world.getTileEntity(pos));
+            final @Nullable TileEntity tile = world.getTileEntity(pos);
+            if(tile instanceof AbstractCampfireTE)
+                state = ((IExtendedBlockState)state).withProperty(ColorProperty.INSTANCE, ((AbstractCampfireTE)tile).color);
+
+            final @Nullable ICampfireType type = ICampfireType.get(tile);
             if(type != null) return ((IExtendedBlockState)state).withProperty(ItemStackProperty.INSTANCE, type.get());
         }
 

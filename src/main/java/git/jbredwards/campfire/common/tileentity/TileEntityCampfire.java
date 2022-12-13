@@ -42,7 +42,7 @@ public class TileEntityCampfire extends AbstractCampfireTE
         if(hasWorld()) {
             //particles
             if(world.isRemote) {
-                if(isLit()) addParticles();
+                if(CampfireConfigHandler.campfireEmitsSmoke && isLit()) addParticles();
             }
             //tick slots
             else {

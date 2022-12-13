@@ -1,9 +1,11 @@
 package git.jbredwards.campfire.common.block;
 
 import git.jbredwards.campfire.Campfire;
+import git.jbredwards.campfire.common.block.state.ColorProperty;
 import git.jbredwards.campfire.common.compat.fluidlogged_api.FluidloggedAPI;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.init.CampfireSounds;
+import git.jbredwards.campfire.common.item.ItemBlockColored;
 import git.jbredwards.campfire.common.tileentity.AbstractCampfireTE;
 import git.jbredwards.fluidlogged_api.api.block.IFluidloggable;
 import git.jbredwards.fluidlogged_api.api.util.FluidState;
@@ -15,10 +17,13 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.init.Enchantments;
 import net.minecraft.init.PotionTypes;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemFireball;
@@ -26,6 +31,8 @@ import net.minecraft.item.ItemFlintAndSteel;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
+import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -33,7 +40,9 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Optional;
@@ -44,6 +53,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -96,7 +106,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     @Nonnull
     @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer.Builder(this).add(SIGNAL, LIT, POWERED).build();
+        return new BlockStateContainer.Builder(this).add(SIGNAL, LIT, POWERED).add(ColorProperty.INSTANCE).build();
     }
 
     @Nonnull
@@ -123,6 +133,46 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
         }
 
         return false;
+    }
+
+    //============
+    //HANDLE ITEMS
+    //============
+
+    @Override
+    public void onBlockPlacedBy(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityLivingBase placer, @Nonnull ItemStack stack) {
+        final @Nullable TileEntity tile = worldIn.getTileEntity(pos);
+        if(tile instanceof AbstractCampfireTE && ((AbstractCampfireTE)tile).color == -1)
+            ((AbstractCampfireTE)tile).color = ItemBlockColored.getColor(stack);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public void harvestBlock(@Nonnull World worldIn, @Nonnull EntityPlayer player, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nullable TileEntity te, @Nonnull ItemStack stack) {
+        if(!(te instanceof AbstractCampfireTE)) {
+            super.harvestBlock(worldIn, player, pos, state, te, stack);
+            return;
+        }
+
+        player.addStat(StatList.getBlockStats(this));
+        player.addExhaustion(0.005f);
+
+        //ensure silk touch drop captures type stored in tile entity
+        if(canSilkHarvest(worldIn, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0) {
+            final List<ItemStack> drops = new ArrayList<>();
+            drops.add(ItemBlockColored.applyColor(new ItemStack(this), ((AbstractCampfireTE)te).color));
+
+            ForgeEventFactory.fireBlockHarvesting(drops, worldIn, pos, state, 0, 1, true, player);
+            drops.forEach(drop -> spawnAsEntity(worldIn, pos, drop));
+        }
+
+        //old code for no silk touch
+        else {
+            harvesters.set(player);
+            final int fortune = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
+            dropBlockAsItem(worldIn, pos, state, fortune);
+            harvesters.set(null);
+        }
     }
 
     //=======================
@@ -308,11 +358,11 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     }
 
     //===============
-    //BLOCK PARTICLES
+    //BLOCK RENDERING
     //===============
 
     @SideOnly(Side.CLIENT)
-    public void addParticles(@Nonnull World world, @Nonnull BlockPos pos, boolean isSignal, boolean isPowered) {
+    public void addParticles(@Nonnull World world, @Nonnull BlockPos pos, int color, boolean isSignal, boolean isPowered) {
 
     }
 
@@ -332,6 +382,18 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
                 }
             }
         }
+    }
+
+    @Nonnull
+    @Override
+    public IBlockState getExtendedState(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
+        if(state instanceof IExtendedBlockState) {
+            final @Nullable TileEntity tile = world.getTileEntity(pos);
+            if(tile instanceof AbstractCampfireTE)
+                return ((IExtendedBlockState)state).withProperty(ColorProperty.INSTANCE, ((AbstractCampfireTE)tile).color);
+        }
+
+        return state;
     }
 
     //===========================
