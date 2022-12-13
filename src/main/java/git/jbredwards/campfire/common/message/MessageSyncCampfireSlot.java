@@ -1,6 +1,6 @@
 package git.jbredwards.campfire.common.message;
 
-import git.jbredwards.campfire.common.tileentity.CampfireSlotInfo;
+import git.jbredwards.campfire.common.tileentity.slot.CampfireSlotInfo;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;

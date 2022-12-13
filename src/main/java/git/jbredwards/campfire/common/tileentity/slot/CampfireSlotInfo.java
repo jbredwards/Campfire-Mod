@@ -1,7 +1,8 @@
-package git.jbredwards.campfire.common.tileentity;
+package git.jbredwards.campfire.common.tileentity.slot;
 
 import git.jbredwards.campfire.Campfire;
 import git.jbredwards.campfire.common.message.MessageSyncCampfireSlot;
+import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;

@@ -1,14 +1,10 @@
 package git.jbredwards.campfire.common.tileentity;
 
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
-import net.minecraft.block.state.IBlockState;
+import git.jbredwards.campfire.common.tileentity.slot.CampfireSlotInfo;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -22,7 +18,7 @@ import java.util.List;
  * @author jbred
  *
  */
-public class TileEntityCampfire extends TileEntity implements ITickable
+public class TileEntityCampfire extends AbstractCampfireTE
 {
     @Nonnull
     public final List<CampfireSlotInfo> slotInfo = new ArrayList<>();
@@ -56,7 +52,6 @@ public class TileEntityCampfire extends TileEntity implements ITickable
         }
     }
 
-    public boolean isLit() { return (getBlockMetadata() & 2) != 0; }
     protected void updateConditionalSlotIsActive() {
         slotInfo.get(4).setActive(CampfireConfigHandler.hasExtraSlots);
         slotInfo.get(5).setActive(CampfireConfigHandler.hasExtraSlots);
@@ -74,8 +69,10 @@ public class TileEntityCampfire extends TileEntity implements ITickable
     }
 
     @SideOnly(Side.CLIENT)
+    @Override
     public void addParticles() {
-
+        super.addParticles();
+        slotInfo.forEach(CampfireSlotInfo::spawnCookParticles);
     }
 
     @Nonnull
@@ -97,10 +94,5 @@ public class TileEntityCampfire extends TileEntity implements ITickable
         final NBTTagList slots = compound.getTagList("slots", Constants.NBT.TAG_COMPOUND);
         for(int i = 0; i < slots.tagCount() && i < slotInfo.size(); i++)
             slotInfo.get(i).deserializeNBT(slots.getCompoundTagAt(i));
-    }
-
-    @Override
-    public boolean shouldRefresh(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState oldState, @Nonnull IBlockState newState) {
-        return oldState.getBlock() != newState.getBlock();
     }
 }

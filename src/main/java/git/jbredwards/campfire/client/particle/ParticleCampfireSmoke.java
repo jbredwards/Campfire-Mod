@@ -1,7 +1,10 @@
 package git.jbredwards.campfire.client.particle;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -15,27 +18,28 @@ import javax.annotation.Nonnull;
 @SideOnly(Side.CLIENT)
 public class ParticleCampfireSmoke extends Particle
 {
-    protected final double yAccel;
-    public ParticleCampfireSmoke(@Nonnull World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn) {
-        super(worldIn, xCoordIn, yCoordIn, zCoordIn, 0, 0, 0);
-        yAccel = 0.004;
-        motionX *= 0.1;
-        motionY *= 0.1;
-        motionZ *= 0.1;
-        motionX += xSpeedIn;
-        motionY += ySpeedIn;
-        motionZ += zSpeedIn;
+    public ParticleCampfireSmoke(@Nonnull World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, boolean longLivingEmber) {
+        super(worldIn, xCoordIn, yCoordIn, zCoordIn);
+        multipleParticleScaleBy(3);
+        setSize(0.25f, 0.25f);
 
-        final float color = world.rand.nextFloat() * 0.3f;
-        particleRed = color;
-        particleGreen = color;
-        particleBlue = color;
+        particleMaxAge = rand.nextInt(50) + (longLivingEmber ? 280 : 80);
+        particleGravity = 3.0E-6F;
+        motionX = xSpeedIn;
+        motionY = ySpeedIn + rand.nextFloat() / 500;
+        motionZ = zSpeedIn;
 
-        particleScale *= 0.75;
-        particleMaxAge = (int)(particleMaxAge / (world.rand.nextFloat() * 0.8 + 0.2));
-        particleMaxAge = (int)(particleMaxAge * 0.75);
-        particleMaxAge = Math.max(particleMaxAge, 1);
-        canCollide = true;
+        setParticleTexture(ModelLoader.defaultTextureGetter().apply(
+                new ResourceLocation("campfire", String.format("particles/big_smoke_%d.png", rand.nextInt(12)))));
+    }
+
+    public static void spawnParticle(@Nonnull World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, boolean longLivingEmber, int color) {
+        final ParticleCampfireSmoke particle = new ParticleCampfireSmoke(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn, longLivingEmber);
+        if(color != -1) particle.setRBGColorF((color >> 16 & 255) / 255f, (color >> 8 & 255) / 255f, (color & 255) / 255f);
+        else particle.setRBGColorF(81 / 255f, 123 / 255f, 116 / 255f); //default particle color
+
+        particle.setAlphaF(longLivingEmber ? 0.95f : 0.9f);
+        Minecraft.getMinecraft().effectRenderer.addEffect(particle);
     }
 
     @Override
@@ -44,26 +48,17 @@ public class ParticleCampfireSmoke extends Particle
         prevPosY = posY;
         prevPosZ = posZ;
 
-        if(particleAge++ >= particleMaxAge) {
-            setExpired();
-            return;
+        if(particleAge++ < particleMaxAge && !(particleAlpha <= 0)) {
+            motionX += rand.nextFloat() / 5000 * (rand.nextBoolean() ? 1 : -1);
+            motionZ += rand.nextFloat() / 5000 * (rand.nextBoolean() ? 1 : -1);
+            motionY -= particleGravity;
+
+            move(motionX, motionY, motionZ);
+            if(particleAge >= particleMaxAge - 60 && particleAlpha > 0.01) particleAlpha -= 0.015;
+
         }
 
-        //setParticleTexture(textures[7 - particleAge * 8 / particleMaxAge]);
-        motionY += yAccel;
-        move(motionX, motionY, motionZ);
-        if(posY == prevPosY) {
-            motionX *= 1.1;
-            motionZ *= 1.1;
-        }
-
-        motionX *= 0.96;
-        motionY *= 0.96;
-        motionZ *= 0.96;
-        if(onGround) {
-            motionX *= 0.7;
-            motionZ *= 0.7;
-        }
+        else setExpired();
     }
 
     @Override

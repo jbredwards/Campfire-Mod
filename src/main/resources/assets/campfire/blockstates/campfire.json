@@ -19,10 +19,10 @@
         }],
         "item":[{
             "submodel":{
-                "ash":[{"model":"campfire:ash"}],
-                "cutout":[{"model":"campfire:cutout_layer"}],
+                "ash":[{"model":"campfire:campfire_ash"}],
+                "cutout":[{"model":"campfire:campfire_cutout_layer"}],
                 "logs":[{
-                    "model":"campfire:logs_builtin",
+                    "model":"campfire:campfire_logs_builtin",
                     "custom":{"parent":"campfire:campfire#logs"}
                 }]
             }
@@ -31,11 +31,11 @@
             "false":{
                 "submodel":{
                     "ash":[{
-                        "model":"campfire:ash",
+                        "model":"campfire:campfire_ash",
                         "textures":{"ash_lit":"campfire:blocks/campfire_ash"}
                     }],
                     "logs":[{
-                        "model":"campfire:logs_builtin",
+                        "model":"campfire:campfire_logs_builtin",
                         "custom":{"parent":"campfire:campfire#logs"}
                     }]
                 }
@@ -49,11 +49,13 @@
                 }
             }
         },
-        "facing":{
-            "north":{},
-            "south":{"y":180},
-            "east":{"y":270},
-            "west":{"y":90}
+        "x_axis":{
+            "true":{"y":90},
+            "false":{}
+        },
+        "signal":{
+            "false":{},
+            "true":{}
         },
         "powered":{
             "false":{},
@@ -61,14 +63,14 @@
         },
         "lit_solid":[{
             "submodel":{
-                "ash":[{"model":"campfire:ash"}],
+                "ash":[{"model":"campfire:campfire_ash"}],
                 "logs":[{
-                    "model":"campfire:logs_builtin",
+                    "model":"campfire:campfire_logs_builtin",
                     "custom":{"parent":"campfire:campfire#logs"}
                 }]
             }
         }],
-        "lit_cutout":[{"model":"campfire:cutout_layer"}],
-        "logs":[{"model":"campfire:logs"}]
+        "lit_cutout":[{"model":"campfire:campfire_cutout_layer"}],
+        "logs":[{"model":"campfire:campfire_logs"}]
     }
 }

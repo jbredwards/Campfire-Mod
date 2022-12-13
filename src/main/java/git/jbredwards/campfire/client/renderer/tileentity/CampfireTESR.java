@@ -1,7 +1,7 @@
 package git.jbredwards.campfire.client.renderer.tileentity;
 
-import git.jbredwards.campfire.common.tileentity.CampfireSlotInfo;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
+import git.jbredwards.campfire.common.tileentity.slot.CampfireSlotInfo;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraftforge.fml.relauncher.Side;

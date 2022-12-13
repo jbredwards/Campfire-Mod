@@ -1,5 +1,6 @@
 package git.jbredwards.campfire.common.init;
 
+import git.jbredwards.campfire.common.block.BlockBrazier;
 import git.jbredwards.campfire.common.block.BlockCampfire;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -14,5 +15,8 @@ import javax.annotation.Nonnull;
 public final class CampfireBlocks
 {
     @Nonnull
-    public static final BlockCampfire CAMPFIRE = new BlockCampfire(Material.WOOD, MapColor.OBSIDIAN);
+    public static final BlockBrazier BRAZIER = new BlockBrazier(Material.IRON, MapColor.OBSIDIAN, true);
+
+    @Nonnull
+    public static final BlockCampfire CAMPFIRE = new BlockCampfire(Material.WOOD, MapColor.OBSIDIAN, true);
 }
