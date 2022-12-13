@@ -2,10 +2,12 @@ package git.jbredwards.campfire.common.block;
 
 import git.jbredwards.campfire.Campfire;
 import git.jbredwards.campfire.common.block.state.ColorProperty;
+import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.compat.fluidlogged_api.FluidloggedAPI;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.init.CampfireSounds;
 import git.jbredwards.campfire.common.item.ItemBlockColored;
+import git.jbredwards.campfire.common.item.ItemCampfire;
 import git.jbredwards.campfire.common.tileentity.AbstractCampfireTE;
 import git.jbredwards.fluidlogged_api.api.block.IFluidloggable;
 import git.jbredwards.fluidlogged_api.api.util.FluidState;
@@ -144,6 +146,15 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
         final @Nullable TileEntity tile = worldIn.getTileEntity(pos);
         if(tile instanceof AbstractCampfireTE && ((AbstractCampfireTE)tile).color == -1)
             ((AbstractCampfireTE)tile).color = ItemBlockColored.getColor(stack);
+    }
+
+    @Nonnull
+    @Override
+    public ItemStack getItem(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
+        final @Nullable TileEntity tile = worldIn.getTileEntity(pos);
+        final ItemStack stack = new ItemStack(this);
+
+        return tile instanceof AbstractCampfireTE ? ItemBlockColored.applyColor(stack, ((AbstractCampfireTE)tile).color) : stack;
     }
 
     @SuppressWarnings("ConstantConditions")

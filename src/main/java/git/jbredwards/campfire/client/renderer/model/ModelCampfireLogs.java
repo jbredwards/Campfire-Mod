@@ -85,7 +85,7 @@ public final class ModelCampfireLogs implements IModel
         @Override
         public List<BakedQuad> getQuads(@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
             final ItemStack type = forcedType.isEmpty() && state instanceof IExtendedBlockState ? ((IExtendedBlockState)state).getValue(ItemStackProperty.INSTANCE) : forcedType;
-            final List<BakedQuad> bakedQuads = originalModel.getQuads(state, side, rand);
+            final List<BakedQuad> bakedQuads = super.getQuads(state, side, rand);
             if(type == null || type.isEmpty()) return bakedQuads;
 
             //get side texture

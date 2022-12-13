@@ -4,6 +4,7 @@
         "transform":"forge:default-block",
         "textures":{
             "ash":"campfire:blocks/campfire_ash",
+            "ash_cutout":"campfire:blocks/campfire_ash_cutout",
             "ash_lit":"campfire:blocks/campfire_ash_lit",
             "fire":"campfire:blocks/campfire_fire",
             "log_side":"blocks/log_oak",
@@ -20,7 +21,14 @@
         "item":[{
             "submodel":{
                 "ash":[{"model":"campfire:campfire_ash"}],
-                "cutout":[{"model":"campfire:campfire_cutout_layer"}],
+                "cutout":[{
+                    "model":"campfire:campfire_fire_builtin",
+                    "custom":{
+                        "parent":"campfire:campfire#cutout_layer",
+                        "coloredFire":"campfire:blocks/campfire_fire_colored",
+                        "coloredAsh":"campfire:blocks/campfire_ash_lit_colored"
+                    }
+                }],
                 "logs":[{
                     "model":"campfire:campfire_logs_builtin",
                     "custom":{"parent":"campfire:campfire#logs"}
@@ -70,7 +78,15 @@
                 }]
             }
         }],
-        "lit_cutout":[{"model":"campfire:campfire_cutout_layer"}],
+        "lit_cutout":[{
+            "model":"campfire:campfire_fire_builtin",
+            "custom":{
+                "parent":"campfire:campfire#cutout_layer",
+                "coloredFire":"campfire:blocks/campfire_fire_colored",
+                "coloredAsh":"campfire:blocks/campfire_ash_lit_colored"
+            }
+        }],
+        "cutout_layer":[{"model":"campfire:campfire_cutout_layer"}],
         "logs":[{"model":"campfire:campfire_logs"}]
     }
 }

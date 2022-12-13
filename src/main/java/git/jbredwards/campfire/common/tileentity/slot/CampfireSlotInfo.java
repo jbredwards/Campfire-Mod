@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.relauncher.Side;
@@ -74,7 +75,13 @@ public class CampfireSlotInfo implements INBTSerializable<NBTTagCompound>
 
     @SideOnly(Side.CLIENT)
     public void spawnCookParticles() {
-
+        if(isActive && !output.isEmpty() && tile.getWorld().rand.nextFloat() < 0.2) {
+            final double x = tile.getPos().getX() + 0.5 + offsetX;
+            final double y = tile.getPos().getY() + 0.5 + offsetY;
+            final double z = tile.getPos().getZ() + 0.5 + offsetZ;
+            for(int i = 0; i < 4; i++)
+                tile.getWorld().spawnParticle(EnumParticleTypes.SMOKE_NORMAL, x, y, z, 0, 5.0E-4D, 0);
+        }
     }
 
     @SideOnly(Side.CLIENT)

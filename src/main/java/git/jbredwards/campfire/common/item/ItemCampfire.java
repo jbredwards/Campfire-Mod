@@ -32,13 +32,19 @@ public class ItemCampfire extends ItemBlockColored {
             if(I18n.canTranslate(specialCase)) return I18n.translateToLocal(specialCase);
             //auto generate a name
             return type.getDisplayName().replaceFirst(
-                    I18n.translateToLocal("regex.campfire.target"),
-                    I18n.translateToLocal("regex.campfire.replacement"));
+                    I18n.translateToLocal(getRegexTarget()),
+                    I18n.translateToLocal(getRegexReplacement()));
         }
 
         //should never pass
         return super.getItemStackDisplayName(stack);
     }
+
+    @Nonnull
+    public String getRegexTarget() { return "regex.campfire.target"; }
+
+    @Nonnull
+    public String getRegexReplacement() { return "regex.campfire.replacement"; }
 
     @Nonnull
     public static ItemStack applyType(@Nonnull Block campfire, @Nonnull ItemStack type) {
