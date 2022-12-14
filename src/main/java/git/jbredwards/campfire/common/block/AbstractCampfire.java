@@ -333,29 +333,12 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     public void extinguishFire(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
         final @Nullable TileEntity tile = world.getTileEntity(pos);
         if(tile instanceof AbstractCampfireTE) {
-            //client-side particles
-            if(world.isRemote) {
-                final int forcedSmokeColor = ((AbstractCampfireTE)tile).forcedSmokeColor;
-                if(isSmokey() || forcedSmokeColor != -1) {
-                    final int smokeColor = ((AbstractCampfireTE)tile).getSmokeColor();
-                    final int fallbackColor = ((AbstractCampfireTE)tile).getFallbackColor();
-
-                    final boolean isSignal = ((AbstractCampfireTE)tile).isSignal();
-                    final boolean isPowered = ((AbstractCampfireTE)tile).isPowered();
-
-                    for(int i = 0; i < 20; i++)
-                        addParticles(world, pos, smokeColor, fallbackColor, forcedSmokeColor != -1, isSignal, isPowered, true);
-                }
-            }
-            //common-side color reset
+            if(world.isRemote) playExtinguishEffects(world, pos, (AbstractCampfireTE)tile, 0.4);
             ((AbstractCampfireTE)tile).color = -1;
         }
 
-        //server-side block placement & sound
-        if(!world.isRemote) {
-            world.playEvent(Constants.WorldEvents.FIRE_EXTINGUISH_SOUND, pos, 0);
-            world.setBlockState(pos, state.withProperty(LIT, false));
-        }
+        world.setBlockState(pos, state.withProperty(LIT, false));
+        if(!world.isRemote) world.playEvent(Constants.WorldEvents.FIRE_EXTINGUISH_SOUND, pos, 0);
     }
 
     public boolean igniteFire(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
@@ -436,7 +419,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     public boolean isSmokey() { return isSmokey; }
 
     @SideOnly(Side.CLIENT)
-    public void addParticles(@Nonnull World world, @Nonnull BlockPos pos, int smokeColor, int fallbackColor, boolean forceCampfireParticles, boolean isSignal, boolean isPowered, boolean spawnExtraSmoke) {
+    public void addParticles(@Nonnull World world, @Nonnull BlockPos pos, int smokeColor, int fallbackColor, boolean forceCampfireParticles, boolean isSignal, boolean isPowered, double extraSmokeOffset) {
         if(isSmokey() || forceCampfireParticles) {
             //campfire smoke
             if(!isPowered || CampfireConfigHandler.poweredAction != CampfireConfigHandler.PoweredAction.DISABLE) {
@@ -449,12 +432,27 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
             }
 
             //extinguish smoke
-            if(spawnExtraSmoke && isSmokey()) {
-                final double x = pos.getX() + 0.25 + world.rand.nextDouble() / 2 * (world.rand.nextBoolean() ? 1 : -1);
-                final double y = pos.getY() + 0.4;
-                final double z = pos.getZ() + 0.25 + world.rand.nextDouble() / 2 * (world.rand.nextBoolean() ? 1 : -1);
+            if(extraSmokeOffset >= 0 && isSmokey()) {
+                final double x = pos.getX() + 0.25 + world.rand.nextDouble() / 2;
+                final double y = pos.getY() + extraSmokeOffset;
+                final double z = pos.getZ() + 0.25 + world.rand.nextDouble() / 2;
                 world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, x, y, z, 0, 0.005, 0);
             }
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void playExtinguishEffects(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull AbstractCampfireTE tile, double extraSmokeOffset) {
+        final int forcedSmokeColor = tile.forcedSmokeColor;
+        if(isSmokey() || forcedSmokeColor != -1) {
+            final int smokeColor = tile.getSmokeColor();
+            final int fallbackColor = tile.getFallbackColor();
+
+            final boolean isSignal = tile.isSignal();
+            final boolean isPowered = tile.isPowered();
+
+            for(int i = 0; i < 20; i++)
+                addParticles(world, pos, smokeColor, fallbackColor, forcedSmokeColor != -1, isSignal, isPowered, extraSmokeOffset);
         }
     }
 
@@ -570,7 +568,15 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     @SideOnly(Side.CLIENT)
     @Override
     public boolean addDestroyEffects(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull ParticleManager manager) {
-        final ICampfireType type = ICampfireType.get(world.getTileEntity(pos));
+        final TileEntity tile = world.getTileEntity(pos);
+        if(tile instanceof AbstractCampfireTE && ((AbstractCampfireTE)tile).isLit()) {
+            playExtinguishEffects(world, pos, (AbstractCampfireTE)tile, 0);
+            world.playSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                    SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS,
+                    0.5f, 2.6f + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8f, false);
+        }
+
+        final ICampfireType type = ICampfireType.get(tile);
         if(type != null) {
             final IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(type.get());
             final TextureAtlasSprite tex = model.getOverrides().handleItemState(model, type.get(), null, null).getParticleTexture();

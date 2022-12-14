@@ -49,7 +49,7 @@ public abstract class AbstractCampfireTE extends TileEntity implements ITickable
             final int fallbackColor = getFallbackColor();
 
             for(int i = 0; i < world.rand.nextInt(2) + 2; i++)
-                block.get().addParticles(world, pos, smokeColor, fallbackColor, forcedSmokeColor != -1, isSignal(), isPowered(), false);
+                block.get().addParticles(world, pos, smokeColor, fallbackColor, forcedSmokeColor != -1, isSignal(), isPowered(), -1);
         }
     }
 
