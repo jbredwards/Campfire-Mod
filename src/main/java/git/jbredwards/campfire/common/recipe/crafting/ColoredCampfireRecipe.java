@@ -99,13 +99,13 @@ public class ColoredCampfireRecipe extends IForgeRegistryEntry.Impl<IRecipe> imp
         return ItemBlockColored.applyColor(dyeable, getResultDyeColor(ItemBlockColored.getColor(dyeable), dyes));
     }
 
+    @Nonnull
+    @Override
+    public ItemStack getRecipeOutput() { return ItemStack.EMPTY; }
+
     @Override
     public boolean isDynamic() { return true; }
 
     @Override
     public boolean canFit(int width, int height) { return width * height >= 2; }
-
-    @Nonnull
-    @Override
-    public ItemStack getRecipeOutput() { return ItemStack.EMPTY; }
 }

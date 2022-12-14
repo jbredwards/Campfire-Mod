@@ -35,6 +35,9 @@ public final class CampfireConfigHandler
     @Config.LangKey("config.campfire.campfireEmitsSmoke")
     public static boolean campfireEmitsSmoke = true;
 
+    @Config.LangKey("config.campfire.doesSmokeFollowDye")
+    public static boolean doesSmokeFollowDye = true;
+
     @Config.LangKey("config.campfire.hasExtraSlots")
     public static boolean hasExtraSlots = true;
 

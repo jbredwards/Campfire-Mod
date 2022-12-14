@@ -1,13 +1,16 @@
 package git.jbredwards.campfire.common.block;
 
 import git.jbredwards.campfire.Campfire;
+import git.jbredwards.campfire.client.particle.ParticleCampfireSmoke;
+import git.jbredwards.campfire.client.particle.ParticleColoredLava;
 import git.jbredwards.campfire.common.block.state.ColorProperty;
+import git.jbredwards.campfire.common.block.state.ItemStackProperty;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.compat.fluidlogged_api.FluidloggedAPI;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.init.CampfireSounds;
 import git.jbredwards.campfire.common.item.ItemBlockColored;
-import git.jbredwards.campfire.common.item.ItemCampfire;
+import git.jbredwards.campfire.common.message.MessageFallParticles;
 import git.jbredwards.campfire.common.tileentity.AbstractCampfireTE;
 import git.jbredwards.fluidlogged_api.api.block.IFluidloggable;
 import git.jbredwards.fluidlogged_api.api.util.FluidState;
@@ -19,12 +22,19 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleDigging;
+import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.PotionTypes;
 import net.minecraft.init.SoundEvents;
@@ -42,6 +52,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -50,6 +61,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -77,7 +89,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
             POWERED = PropertyBool.create("powered"),
             SIGNAL = PropertyBool.create("signal");
 
-    public final boolean isSmokey;
+    protected final boolean isSmokey;
 
     public AbstractCampfire(@Nonnull Material materialIn, boolean isSmokeyIn) {
         this(materialIn, materialIn.getMaterialMapColor(), isSmokeyIn);
@@ -142,10 +154,25 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     //============
 
     @Override
+    protected boolean canSilkHarvest() { return true; }
+
+    @Nonnull
+    @Override
+    public IBlockState getStateForPlacement(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ, int meta, @Nonnull EntityLivingBase placer) {
+        return getDefaultState();
+    }
+
+    @Override
     public void onBlockPlacedBy(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityLivingBase placer, @Nonnull ItemStack stack) {
         final @Nullable TileEntity tile = worldIn.getTileEntity(pos);
-        if(tile instanceof AbstractCampfireTE && ((AbstractCampfireTE)tile).color == -1)
+        if(tile instanceof AbstractCampfireTE && AbstractCampfireTE.getColor(tile) == -1)
             ((AbstractCampfireTE)tile).color = ItemBlockColored.getColor(stack);
+
+        final ICampfireType stackCap = ICampfireType.get(stack);
+        if(stackCap != null) {
+            final ICampfireType tileCap = ICampfireType.get(tile);
+            if(tileCap != null) tileCap.set(stackCap.get());
+        }
     }
 
     @Nonnull
@@ -154,7 +181,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
         final @Nullable TileEntity tile = worldIn.getTileEntity(pos);
         final ItemStack stack = new ItemStack(this);
 
-        return tile instanceof AbstractCampfireTE ? ItemBlockColored.applyColor(stack, ((AbstractCampfireTE)tile).color) : stack;
+        return tile instanceof AbstractCampfireTE ? ItemBlockColored.applyColor(stack, AbstractCampfireTE.getColor(tile)) : stack;
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -171,7 +198,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
         //ensure silk touch drop captures type stored in tile entity
         if(canSilkHarvest(worldIn, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0) {
             final List<ItemStack> drops = new ArrayList<>();
-            drops.add(ItemBlockColored.applyColor(new ItemStack(this), ((AbstractCampfireTE)te).color));
+            drops.add(ItemBlockColored.applyColor(new ItemStack(this), AbstractCampfireTE.getColor(te)));
 
             ForgeEventFactory.fireBlockHarvesting(drops, worldIn, pos, state, 0, 1, true, player);
             drops.forEach(drop -> spawnAsEntity(worldIn, pos, drop));
@@ -186,19 +213,31 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
         }
     }
 
-    //=======================
-    //HANDLE POWERED PROPERTY
-    //=======================
+    //==================================
+    //HANDLE POWERED & SIGNAL PROPERTIES
+    //==================================
 
     @Override
     public void onBlockAdded(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
+        if(worldIn.getBlockState(pos.down()).getBlock() == Blocks.HAY_BLOCK) updateSignal(worldIn, pos, state, true);
         if(worldIn.isBlockPowered(pos)) updatePower(worldIn, pos, state, true);
     }
 
     @Override
     public void neighborChanged(@Nonnull IBlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull Block blockIn, @Nonnull BlockPos fromPos) {
+        if(pos.down().equals(fromPos)) {
+            final boolean isSignal = state.getValue(SIGNAL);
+            if(isSignal != (worldIn.getBlockState(fromPos).getBlock() == Blocks.HAY_BLOCK))
+                updateSignal(worldIn, pos, state, !isSignal);
+        }
+
         final boolean isPowered = state.getValue(POWERED);
         if(isPowered != worldIn.isBlockPowered(pos)) updatePower(worldIn, pos, state, !isPowered);
+    }
+
+    public void updateSignal(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, boolean newSignal) {
+        final int blockFlags = Constants.BlockFlags.SEND_TO_CLIENTS | Constants.BlockFlags.NO_OBSERVERS;
+        worldIn.setBlockState(pos, state.withProperty(SIGNAL, newSignal), blockFlags);
     }
 
     public void updatePower(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, boolean newPower) {
@@ -212,7 +251,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     static void handleProjectileCollision(@Nonnull ProjectileImpactEvent event) {
-        if(!event.getEntity().world.isRemote && event.getRayTraceResult().typeOfHit == RayTraceResult.Type.BLOCK) {
+        if(event.getRayTraceResult().typeOfHit == RayTraceResult.Type.BLOCK) {
             final RayTraceResult result = event.getRayTraceResult();
             final Entity entity = event.getEntity();
             //water extinguishes fire
@@ -222,8 +261,8 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
                 if(potionType == PotionTypes.WATER && PotionUtils.getEffectsFromStack(potion).isEmpty()) {
                     final BlockPos pos = result.getBlockPos();
                     final IBlockState state = entity.world.getBlockState(pos);
-                    if(state.getBlock() instanceof BlockCampfire && state.getValue(LIT))
-                        ((BlockCampfire)state.getBlock()).extinguishFire(entity.world, pos, state);
+                    if(state.getBlock() instanceof AbstractCampfire && state.getValue(LIT))
+                        ((AbstractCampfire<?>)state.getBlock()).extinguishFire(entity.world, pos, state);
                 }
             }
             //snowballs extinguish fire
@@ -232,16 +271,16 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
                 final BlockPos pos = result.getBlockPos();
                 if(fireBB.offset(pos).contains(result.hitVec.add(new Vec3d(result.sideHit.getDirectionVec()).scale(0.1)))) {
                     final IBlockState state = entity.world.getBlockState(pos);
-                    if(state.getBlock() instanceof BlockCampfire && state.getValue(LIT))
-                        ((BlockCampfire)state.getBlock()).extinguishFire(entity.world, pos, state);
+                    if(state.getBlock() instanceof AbstractCampfire && state.getValue(LIT))
+                        ((AbstractCampfire<?>)state.getBlock()).extinguishFire(entity.world, pos, state);
                 }
             }
             //entities on fire ignite it
             else if(entity.isBurning()) {
                 final BlockPos pos = result.getBlockPos();
                 final IBlockState state = entity.world.getBlockState(pos);
-                if(state.getBlock() instanceof BlockCampfire && !state.getValue(LIT))
-                    if(((BlockCampfire)state.getBlock()).igniteFire(entity.world, pos, state))
+                if(state.getBlock() instanceof AbstractCampfire && !state.getValue(LIT))
+                    if(((AbstractCampfire<?>)state.getBlock()).igniteFire(entity.world, pos, state))
                         event.setCanceled(true);
             }
         }
@@ -255,7 +294,8 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     @Override
     public void onEntityCollision(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull Entity entityIn) {
         if(entityIn instanceof EntityPlayer && !((EntityPlayer)entityIn).isAllowEdit()) return;
-        if(!worldIn.isRemote && entityIn.isBurning() && !state.getValue(LIT)) igniteFire(worldIn, pos, state);
+        if(!worldIn.isRemote && entityIn.posY < pos.getY() + 0.5 && entityIn.isBurning() && !state.getValue(LIT))
+            igniteFire(worldIn, pos, state);
     }
 
     public boolean handleFireIgnite(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer playerIn, @Nonnull ItemStack stack) {
@@ -291,6 +331,27 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     }
 
     public void extinguishFire(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
+        final @Nullable TileEntity tile = world.getTileEntity(pos);
+        if(tile instanceof AbstractCampfireTE) {
+            //client-side particles
+            if(world.isRemote) {
+                final int forcedSmokeColor = ((AbstractCampfireTE)tile).forcedSmokeColor;
+                if(isSmokey() || forcedSmokeColor != -1) {
+                    final int smokeColor = ((AbstractCampfireTE)tile).getSmokeColor();
+                    final int fallbackColor = ((AbstractCampfireTE)tile).getFallbackColor();
+
+                    final boolean isSignal = ((AbstractCampfireTE)tile).isSignal();
+                    final boolean isPowered = ((AbstractCampfireTE)tile).isPowered();
+
+                    for(int i = 0; i < 20; i++)
+                        addParticles(world, pos, smokeColor, fallbackColor, forcedSmokeColor != -1, isSignal, isPowered, true);
+                }
+            }
+            //common-side color reset
+            ((AbstractCampfireTE)tile).color = -1;
+        }
+
+        //server-side block placement & sound
         if(!world.isRemote) {
             world.playEvent(Constants.WorldEvents.FIRE_EXTINGUISH_SOUND, pos, 0);
             world.setBlockState(pos, state.withProperty(LIT, false));
@@ -372,9 +433,29 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     //BLOCK RENDERING
     //===============
 
-    @SideOnly(Side.CLIENT)
-    public void addParticles(@Nonnull World world, @Nonnull BlockPos pos, int color, boolean isSignal, boolean isPowered) {
+    public boolean isSmokey() { return isSmokey; }
 
+    @SideOnly(Side.CLIENT)
+    public void addParticles(@Nonnull World world, @Nonnull BlockPos pos, int smokeColor, int fallbackColor, boolean forceCampfireParticles, boolean isSignal, boolean isPowered, boolean spawnExtraSmoke) {
+        if(isSmokey() || forceCampfireParticles) {
+            //campfire smoke
+            if(!isPowered || CampfireConfigHandler.poweredAction != CampfireConfigHandler.PoweredAction.DISABLE) {
+                final double x = pos.getX() + 0.5 + world.rand.nextDouble() / 3 * (world.rand.nextBoolean() ? 1 : -1);
+                final double y = pos.getY() + world.rand.nextDouble() + world.rand.nextDouble();
+                final double z = pos.getZ() + 0.5 + world.rand.nextDouble() / 3 * (world.rand.nextBoolean() ? 1 : -1);
+
+                final int color = isPowered ? smokeColor : fallbackColor;
+                ParticleCampfireSmoke.spawnParticle(world, x, y, z, 0, 0.07, 0, isSignal, !isPowered && color != -1, color);
+            }
+
+            //extinguish smoke
+            if(spawnExtraSmoke && isSmokey()) {
+                final double x = pos.getX() + 0.25 + world.rand.nextDouble() / 2 * (world.rand.nextBoolean() ? 1 : -1);
+                final double y = pos.getY() + 0.4;
+                final double z = pos.getZ() + 0.25 + world.rand.nextDouble() / 2 * (world.rand.nextBoolean() ? 1 : -1);
+                world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, x, y, z, 0, 0.005, 0);
+            }
+        }
     }
 
     @SideOnly(Side.CLIENT)
@@ -387,10 +468,10 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
             }
 
             //lava particles
-            if(isSmokey && rand.nextInt(5) == 0) {
-                for(int i = 0; i < rand.nextInt(1) + 1; ++i) {
-                    worldIn.spawnParticle(EnumParticleTypes.LAVA, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, rand.nextFloat() / 2, 5.0E-5D, rand.nextFloat() / 2);
-                }
+            if(rand.nextInt(5) == 0) {
+                final int color = AbstractCampfireTE.getColor(worldIn.getTileEntity(pos));
+                for(int i = 0; i < rand.nextInt(1) + 1; ++i)
+                    ParticleColoredLava.spawnParticle(worldIn, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, color);
             }
         }
     }
@@ -400,11 +481,120 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     public IBlockState getExtendedState(@Nonnull IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
         if(state instanceof IExtendedBlockState) {
             final @Nullable TileEntity tile = world.getTileEntity(pos);
-            if(tile instanceof AbstractCampfireTE)
-                return ((IExtendedBlockState)state).withProperty(ColorProperty.INSTANCE, ((AbstractCampfireTE)tile).color);
+            state = ((IExtendedBlockState)state).withProperty(ColorProperty.INSTANCE, AbstractCampfireTE.getColor(tile));
+
+            final @Nullable ICampfireType type = ICampfireType.get(tile);
+            if(type != null) return ((IExtendedBlockState)state).withProperty(ItemStackProperty.INSTANCE, type.get());
         }
 
         return state;
+    }
+
+    //===============
+    //BLOCK PARTICLES
+    //===============
+
+    @Override
+    public boolean addLandingEffects(@Nonnull IBlockState state, @Nonnull WorldServer worldObj, @Nonnull BlockPos blockPosition, @Nonnull IBlockState iblockstate, @Nonnull EntityLivingBase entity, int amount) {
+        final ICampfireType type = ICampfireType.get(worldObj.getTileEntity(blockPosition));
+        if(type != null) {
+            Campfire.wrapper.sendToAllAround(
+                    new MessageFallParticles(blockPosition, entity.posX, entity.posY, entity.posZ, amount),
+                    new NetworkRegistry.TargetPoint(entity.dimension, entity.posX, entity.posY, entity.posZ, 32));
+
+            return true;
+        }
+
+        return super.addLandingEffects(state, worldObj, blockPosition, iblockstate, entity, amount);
+    }
+
+    @Override
+    public boolean addRunningEffects(@Nonnull IBlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull Entity entity) {
+        if(world.isRemote) {
+            final ICampfireType type = ICampfireType.get(world.getTileEntity(pos));
+            if(type != null) {
+                final double x = entity.posX + entity.width * (world.rand.nextFloat() - 0.5);
+                final double y = entity.getEntityBoundingBox().minY + 0.1;
+                final double z = entity.posZ + entity.width * (world.rand.nextFloat() - 0.5);
+
+                final ParticleManager manager = Minecraft.getMinecraft().effectRenderer;
+                final Particle particle = manager.particleTypes.get(EnumParticleTypes.BLOCK_CRACK.getParticleID())
+                        .createParticle(EnumParticleTypes.BLOCK_CRACK.getParticleID(), world, x, y, z, -entity.motionX * 4, 1.5, -entity.motionZ * 4, 0);
+
+                if(particle != null) {
+                    final IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(type.get());
+                    particle.setParticleTexture(model.getOverrides().handleItemState(model, type.get(), null, null).getParticleTexture());
+                    manager.addEffect(particle);
+                    return true;
+                }
+            }
+        }
+
+        return super.addRunningEffects(state, world, pos, entity);
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public boolean addHitEffects(@Nonnull IBlockState state, @Nonnull World worldObj, @Nonnull RayTraceResult target, @Nonnull ParticleManager manager) {
+        final BlockPos pos = target.getBlockPos();
+        final ICampfireType type = ICampfireType.get(worldObj.getTileEntity(pos));
+        if(type != null) {
+            final double offset = 0.1;
+            double x = pos.getX() + worldObj.rand.nextDouble() * (1 - offset * 2) + offset;
+            double y = pos.getY() + worldObj.rand.nextDouble() * (0.4375 - offset * 2) + offset;
+            double z = pos.getZ() + worldObj.rand.nextDouble() * (1 - offset * 2) + offset;
+            switch(target.sideHit) {
+                case UP:    y = pos.getY() + offset + 0.4375;
+                    break;
+                case DOWN:  y = pos.getY() - offset;
+                    break;
+                case NORTH: z = pos.getZ() - offset;
+                    break;
+                case SOUTH: z = pos.getZ() + offset + 1;
+                    break;
+                case WEST:  x = pos.getX() - offset;
+                    break;
+                case EAST:  x = pos.getX() + offset + 1;
+            }
+
+            final IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(type.get());
+            final Particle particle = new ParticleDigging(worldObj, x, y, z, 0, 0, 0, Blocks.AIR.getDefaultState()).setBlockPos(pos).multiplyVelocity(0.2f).multipleParticleScaleBy(0.6f);
+            particle.setParticleTexture(model.getOverrides().handleItemState(model, type.get(), null, null).getParticleTexture());
+            manager.addEffect(particle);
+            return true;
+        }
+
+        return super.addHitEffects(state, worldObj, target, manager);
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public boolean addDestroyEffects(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull ParticleManager manager) {
+        final ICampfireType type = ICampfireType.get(world.getTileEntity(pos));
+        if(type != null) {
+            final IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(type.get());
+            final TextureAtlasSprite tex = model.getOverrides().handleItemState(model, type.get(), null, null).getParticleTexture();
+
+            final int particleCount = 64; //value must have only one true bit
+            final int particlesPer = particleCount >> 4;
+            for(int i = 0; i < particleCount; i++) {
+                final int ix = i & particlesPer - 1;
+                final int iy = i >> 2 & particlesPer - 1;
+                final int iz = i >> 4 & particlesPer - 1;
+
+                final double x = (ix + 0.5) / particlesPer;
+                final double y = (iy + 0.5) / particlesPer;
+                final double z = (iz + 0.5) / particlesPer;
+
+                final Particle particle = new ParticleDigging(world, pos.getX() + x, pos.getY() + y, pos.getZ() + z, x - 0.5, y - 0.5, z - 0.5, Blocks.AIR.getDefaultState()).setBlockPos(pos);
+                particle.setParticleTexture(tex);
+                manager.addEffect(particle);
+            }
+
+            return true;
+        }
+
+        return super.addDestroyEffects(world, pos, manager);
     }
 
     //===========================

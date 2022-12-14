@@ -23,10 +23,10 @@ final class RegistryHandler
 {
     @SubscribeEvent
     static void registerBlock(@Nonnull RegistryEvent.Register<Block> event) {
-        event.getRegistry().register(CampfireBlocks.BRAZIER.setRegistryName("brazier").setTranslationKey("campfire:brazier"));
+        event.getRegistry().register(CampfireBlocks.BRAZIER.setRegistryName("brazier").setTranslationKey("campfire.brazier"));
         TileEntity.register("campfire:brazier", TileEntityBrazier.class);
 
-        event.getRegistry().register(CampfireBlocks.CAMPFIRE.setRegistryName("campfire").setTranslationKey("campfire:campfire"));
+        event.getRegistry().register(CampfireBlocks.CAMPFIRE.setRegistryName("campfire").setTranslationKey("campfire.campfire"));
         TileEntity.register("campfire:campfire", TileEntityCampfire.class);
     }
 

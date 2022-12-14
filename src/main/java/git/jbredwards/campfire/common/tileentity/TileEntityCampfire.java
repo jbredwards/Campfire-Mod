@@ -42,7 +42,7 @@ public class TileEntityCampfire extends AbstractCampfireTE
         if(hasWorld()) {
             //particles
             if(world.isRemote) {
-                if(CampfireConfigHandler.campfireEmitsSmoke && isLit()) addParticles();
+                if(isLit()) addParticles();
             }
             //tick slots
             else {
@@ -78,11 +78,11 @@ public class TileEntityCampfire extends AbstractCampfireTE
     @Nonnull
     @Override
     public NBTTagCompound writeToNBT(@Nonnull NBTTagCompound compound) {
-        compound = super.writeToNBT(compound);
+        super.writeToNBT(compound);
         //write slots
         final NBTTagList slots = new NBTTagList();
         slotInfo.forEach(slot -> slots.appendTag(slot.serializeNBT()));
-        compound.setTag("slots", slots);
+        compound.setTag("Slots", slots);
 
         return compound;
     }
@@ -91,7 +91,7 @@ public class TileEntityCampfire extends AbstractCampfireTE
     public void readFromNBT(@Nonnull NBTTagCompound compound) {
         super.readFromNBT(compound);
         //read slots
-        final NBTTagList slots = compound.getTagList("slots", Constants.NBT.TAG_COMPOUND);
+        final NBTTagList slots = compound.getTagList("Slots", Constants.NBT.TAG_COMPOUND);
         for(int i = 0; i < slots.tagCount() && i < slotInfo.size(); i++)
             slotInfo.get(i).deserializeNBT(slots.getCompoundTagAt(i));
     }

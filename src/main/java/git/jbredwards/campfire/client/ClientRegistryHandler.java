@@ -7,10 +7,13 @@ import git.jbredwards.campfire.common.init.CampfireItems;
 import git.jbredwards.campfire.common.item.ItemBlockColored;
 import git.jbredwards.campfire.common.tileentity.AbstractCampfireTE;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -58,5 +61,16 @@ final class ClientRegistryHandler
 
         ModelLoader.setCustomModelResourceLocation(CampfireItems.CAMPFIRE, 0,
                 new ModelResourceLocation(String.valueOf(CampfireItems.CAMPFIRE.getRegistryName()), "inventory"));
+    }
+
+    @SubscribeEvent
+    static void registerTextures(@Nonnull TextureStitchEvent.Pre event) {
+        if(event.getMap() == Minecraft.getMinecraft().getTextureMapBlocks()) {
+            event.getMap().registerSprite(new ResourceLocation("campfire", "particles/colored_lava"));
+            //register each frame of the campfire smoke particle
+            for(int i = 0; i < 12; i++)
+                event.getMap().registerSprite(new ResourceLocation("campfire",
+                        String.format("particles/big_smoke_%d", i)));
+        }
     }
 }

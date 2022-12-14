@@ -37,7 +37,8 @@ final class CraftingRecipeHandler
                         .setRegistryName("campfire", String.format("campfire.%s.%s",
                                 type.getItem().getCreatorModId(type), type.getTranslationKey()))));
 
-        //dyeable
+
         event.getRegistry().register(new ColoredCampfireRecipe().setRegistryName("dyeCampfire"));
+        event.getRegistry().register(new BrazierRecipe(CampfireItems.CAMPFIRE, CampfireItems.BRAZIER).setRegistryName("brazier"));
     }
 }

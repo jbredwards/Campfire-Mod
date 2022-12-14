@@ -9,6 +9,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
+import java.awt.*;
 
 /**
  *
@@ -30,14 +31,17 @@ public class ParticleCampfireSmoke extends Particle
         motionZ = zSpeedIn;
 
         setParticleTexture(ModelLoader.defaultTextureGetter().apply(
-                new ResourceLocation("campfire", String.format("particles/big_smoke_%d.png", rand.nextInt(12)))));
+                new ResourceLocation("campfire", String.format("particles/big_smoke_%d", rand.nextInt(12)))));
     }
 
-    public static void spawnParticle(@Nonnull World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, boolean longLivingEmber, int color) {
+    public static void spawnParticle(@Nonnull World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, boolean longLivingEmber, boolean makeBrighter, int color) {
         final ParticleCampfireSmoke particle = new ParticleCampfireSmoke(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn, longLivingEmber);
-        if(color != -1) particle.setRBGColorF((color >> 16 & 255) / 255f, (color >> 8 & 255) / 255f, (color & 255) / 255f);
-        else particle.setRBGColorF(81 / 255f, 123 / 255f, 116 / 255f); //default particle color
+        if(color != -1) {
+            if(makeBrighter) color = new Color(color).brighter().getRGB();
+            particle.setRBGColorF((color >> 16 & 255) / 255f, (color >> 8 & 255) / 255f, (color & 255) / 255f);
+        }
 
+        else particle.setRBGColorF(129 / 255f, 123 / 255f, 116 / 255f); //default particle color
         particle.setAlphaF(longLivingEmber ? 0.95f : 0.9f);
         Minecraft.getMinecraft().effectRenderer.addEffect(particle);
     }

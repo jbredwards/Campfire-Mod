@@ -1,4 +1,5 @@
 //blocks
+tile.campfire.brazier.name=Brazier
 tile.campfire.campfire.name=Campfire
 //regex
 regex.campfire.target=$

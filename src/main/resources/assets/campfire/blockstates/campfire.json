@@ -38,10 +38,7 @@
         "lit":{
             "false":{
                 "submodel":{
-                    "ash":[{
-                        "model":"campfire:campfire_ash",
-                        "textures":{"ash_lit":"campfire:blocks/campfire_ash"}
-                    }],
+                    "ash":[{"model":"campfire:campfire_ash"}],
                     "logs":[{
                         "model":"campfire:campfire_logs_builtin",
                         "custom":{"parent":"campfire:campfire#logs"}

@@ -50,11 +50,6 @@
 			}
 		}
 	],
-	"display": {
-		"head": {
-			"translation": [0, 10.5, 0]
-		}
-	},
 	"groups": [
 		{
 			"name": "cinders",
