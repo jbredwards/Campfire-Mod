@@ -33,10 +33,10 @@ public class BlockBrazier extends AbstractCampfire<TileEntityBrazier>
             //ash
             box(0,  0, 0,  16, 2,  16),
             //cage
-            box(0,  2, 0,  16, 14, 0),
-            box(0,  2, 0,  0,  14, 16),
-            box(0,  2, 16, 16, 14, 16),
-            box(16, 2, 0,  16, 14, 16)
+            box(0,      2, 0,      16,    14, 0.001),
+            box(0,      2, 0,      0.001, 14, 16),
+            box(0,      2, 15.999, 16,    14, 16),
+            box(15.999, 2, 0,      16,    14, 16)
     );
 
     public BlockBrazier(@Nonnull Material materialIn, boolean isSmokeyIn) {
@@ -45,7 +45,8 @@ public class BlockBrazier extends AbstractCampfire<TileEntityBrazier>
 
     public BlockBrazier(@Nonnull Material materialIn, @Nonnull MapColor mapColorIn, boolean isSmokeyIn) {
         super(materialIn, mapColorIn, isSmokeyIn);
-        setSoundType(SoundType.METAL).setCreativeTab(CreativeTabs.DECORATIONS);
+        setSoundType(SoundType.METAL).setCreativeTab(CreativeTabs.DECORATIONS)
+                .setHardness(2).setLightOpacity(2).setHarvestLevel("pickaxe", 0);
     }
 
     @Nonnull

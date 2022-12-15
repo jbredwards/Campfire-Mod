@@ -165,8 +165,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     @Override
     public void onBlockPlacedBy(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityLivingBase placer, @Nonnull ItemStack stack) {
         final @Nullable TileEntity tile = worldIn.getTileEntity(pos);
-        if(tile instanceof AbstractCampfireTE && AbstractCampfireTE.getColor(tile) == -1)
-            ((AbstractCampfireTE)tile).color = ItemBlockColored.getColor(stack);
+        if(tile instanceof AbstractCampfireTE) ((AbstractCampfireTE)tile).color = ItemBlockColored.getColor(stack);
 
         final ICampfireType stackCap = ICampfireType.get(stack);
         if(stackCap != null) {
@@ -267,13 +266,10 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
             }
             //snowballs extinguish fire
             else if(entity instanceof EntitySnowball) {
-                final AxisAlignedBB fireBB = new AxisAlignedBB(0.25, 0.0625, 0.25, 0.75, 1, 0.75);
                 final BlockPos pos = result.getBlockPos();
-                if(fireBB.offset(pos).contains(result.hitVec.add(new Vec3d(result.sideHit.getDirectionVec()).scale(0.1)))) {
-                    final IBlockState state = entity.world.getBlockState(pos);
-                    if(state.getBlock() instanceof AbstractCampfire && state.getValue(LIT))
-                        ((AbstractCampfire<?>)state.getBlock()).extinguishFire(entity.world, pos, state);
-                }
+                final IBlockState state = entity.world.getBlockState(pos);
+                if(state.getBlock() instanceof AbstractCampfire && state.getValue(LIT))
+                    ((AbstractCampfire<?>)state.getBlock()).extinguishFire(entity.world, pos, state);
             }
             //entities on fire ignite it
             else if(entity.isBurning()) {
@@ -569,12 +565,10 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     @Override
     public boolean addDestroyEffects(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull ParticleManager manager) {
         final TileEntity tile = world.getTileEntity(pos);
-        if(tile instanceof AbstractCampfireTE && ((AbstractCampfireTE)tile).isLit()) {
-            playExtinguishEffects(world, pos, (AbstractCampfireTE)tile, 0);
+        if(tile instanceof AbstractCampfireTE && ((AbstractCampfireTE)tile).isLit())
             world.playSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
                     SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS,
                     0.5f, 2.6f + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8f, false);
-        }
 
         final ICampfireType type = ICampfireType.get(tile);
         if(type != null) {
