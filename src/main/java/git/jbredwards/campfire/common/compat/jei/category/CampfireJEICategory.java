@@ -4,7 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import git.jbredwards.campfire.common.capability.ICampfireType;
-import git.jbredwards.campfire.common.compat.jei.recipe.CampfireRecipeWrapper;
+import git.jbredwards.campfire.common.compat.jei.recipe.CampfireJEIRecipeWrapper;
 import git.jbredwards.campfire.common.init.CampfireItems;
 import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.IDrawable;
@@ -28,7 +28,7 @@ import java.util.List;
  * @author jbred
  *
  */
-public class CampfireCategory extends FurnaceRecipeCategory<CampfireRecipeWrapper>
+public class CampfireJEICategory extends FurnaceRecipeCategory<CampfireJEIRecipeWrapper>
 {
     @Nonnull public static final String NAME = "campfire:campfire";
 
@@ -36,9 +36,9 @@ public class CampfireCategory extends FurnaceRecipeCategory<CampfireRecipeWrappe
     @Nonnull public final IDrawable background, icon;
 
     public static final List<Object> catalysts = new ArrayList<>();
-    public static CampfireCategory instance;
+    public static CampfireJEICategory instance;
 
-    protected CampfireCategory(@Nonnull IGuiHelper guiHelper) {
+    protected CampfireJEICategory(@Nonnull IGuiHelper guiHelper) {
         super(guiHelper);
         cachedArrows = CacheBuilder.newBuilder()
         .maximumSize(25)
@@ -55,8 +55,8 @@ public class CampfireCategory extends FurnaceRecipeCategory<CampfireRecipeWrappe
     }
 
     @Nonnull
-    public static CampfireCategory getOrBuildInstance(@Nonnull IGuiHelper guiHelper) {
-        return instance == null ? (instance = new CampfireCategory(guiHelper)) : instance;
+    public static CampfireJEICategory getOrBuildInstance(@Nonnull IGuiHelper guiHelper) {
+        return instance == null ? (instance = new CampfireJEICategory(guiHelper)) : instance;
     }
 
     @Nonnull
@@ -85,7 +85,7 @@ public class CampfireCategory extends FurnaceRecipeCategory<CampfireRecipeWrappe
     }
 
     @Override
-    public void setRecipe(@Nonnull IRecipeLayout recipeLayout, @Nonnull CampfireRecipeWrapper recipeWrapper, @Nonnull IIngredients ingredients) {
+    public void setRecipe(@Nonnull IRecipeLayout recipeLayout, @Nonnull CampfireJEIRecipeWrapper recipeWrapper, @Nonnull IIngredients ingredients) {
         final IGuiItemStackGroup guiItemStacks = recipeLayout.getItemStacks();
         guiItemStacks.init(inputSlot, true, 0, 0);
         guiItemStacks.init(outputSlot, false, 60, 18);

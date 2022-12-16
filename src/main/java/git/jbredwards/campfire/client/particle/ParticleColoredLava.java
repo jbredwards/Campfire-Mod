@@ -2,7 +2,6 @@ package git.jbredwards.campfire.client.particle;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleLava;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
@@ -27,11 +26,6 @@ public class ParticleColoredLava extends ParticleLava
     }
 
     public static void spawnParticle(@Nonnull World world, double xCoordIn, double yCoordIn, double zCoordIn, int color) {
-        if(color == -1) {
-            world.spawnParticle(EnumParticleTypes.LAVA, xCoordIn, yCoordIn, zCoordIn, 0, 0, 0);
-            return;
-        }
-
         final ParticleColoredLava particle = new ParticleColoredLava(world, xCoordIn, yCoordIn, zCoordIn);
         color = new Color(color).brighter().getRGB();
 

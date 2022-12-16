@@ -1,6 +1,6 @@
 package git.jbredwards.campfire.common.compat.jei.recipe;
 
-import git.jbredwards.campfire.common.compat.jei.category.CampfireCategory;
+import git.jbredwards.campfire.common.compat.jei.category.CampfireJEICategory;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipe;
 import mezz.jei.plugins.vanilla.furnace.SmeltingRecipe;
 import mezz.jei.util.Translator;
@@ -15,13 +15,13 @@ import java.util.List;
  * @author jbred
  *
  */
-public class CampfireRecipeWrapper extends SmeltingRecipe
+public class CampfireJEIRecipeWrapper extends SmeltingRecipe
 {
     public final int cookTime;
     public final float experience;
     public final List<ItemStack> campfireTypes;
 
-    public CampfireRecipeWrapper(@Nonnull CampfireRecipe recipe) {
+    public CampfireJEIRecipeWrapper(@Nonnull CampfireRecipe recipe) {
         super(recipe.inputs, recipe.output);
         cookTime = recipe.cookTime;
         experience = recipe.experience;
@@ -30,7 +30,7 @@ public class CampfireRecipeWrapper extends SmeltingRecipe
 
     @Override
     public void drawInfo(@Nonnull Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY) {
-        CampfireCategory.instance.cachedArrows.getUnchecked(cookTime).draw(minecraft, 24, 18);
+        CampfireJEICategory.instance.cachedArrows.getUnchecked(cookTime).draw(minecraft, 24, 18);
 
         if(experience > 0) {
             final String experienceString = Translator.translateToLocalFormatted("gui.campfire.jei.category.campfire.experience", experience);

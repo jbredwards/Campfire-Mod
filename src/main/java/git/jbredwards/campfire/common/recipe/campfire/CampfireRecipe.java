@@ -30,8 +30,26 @@ public class CampfireRecipe
         this.experience = experience;
     }
 
-    public boolean canAccept(@Nonnull ItemStack in) {
-        for(ItemStack input : inputs) if(ItemHandlerHelper.canItemStacksStack(in, input)) return true;
+    //when campfire type is empty, skip type check
+    public boolean canAccept(@Nonnull ItemStack in, @Nonnull ItemStack campfireTypeIn) {
+        boolean isValidType = campfireTypeIn.isEmpty();
+        if(!isValidType) {
+            for(ItemStack campfireType : campfireTypes) {
+                if(ItemHandlerHelper.canItemStacksStack(campfireTypeIn, campfireType)) {
+                    isValidType = true;
+                    break;
+                }
+            }
+        }
+
+        if(isValidType) {
+            for(ItemStack input : inputs) {
+                if(ItemHandlerHelper.canItemStacksStack(in, input)) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 }

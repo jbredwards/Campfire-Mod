@@ -19,7 +19,7 @@ public class CampfireTESR extends TileEntitySpecialRenderer<TileEntityCampfire>
 {
     @Override
     public void render(@Nonnull TileEntityCampfire te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-        if(!te.slotInfo.isEmpty()) {
+        if(te.hasWorld() && !te.slotInfo.isEmpty()) {
             GlStateManager.pushMatrix();
             GlStateManager.translate(x + 0.5, y + 0.5, z + 0.5);
             te.slotInfo.forEach(CampfireSlotInfo::render);

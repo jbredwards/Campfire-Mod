@@ -1,8 +1,8 @@
 package git.jbredwards.campfire.common.compat.jei;
 
 import git.jbredwards.campfire.common.capability.ICampfireType;
-import git.jbredwards.campfire.common.compat.jei.category.CampfireCategory;
-import git.jbredwards.campfire.common.compat.jei.recipe.CampfireRecipeWrapper;
+import git.jbredwards.campfire.common.compat.jei.category.CampfireJEICategory;
+import git.jbredwards.campfire.common.compat.jei.recipe.CampfireJEIRecipeWrapper;
 import git.jbredwards.campfire.common.init.CampfireItems;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipeHandler;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipe;
@@ -19,15 +19,15 @@ import javax.annotation.Nonnull;
  *
  */
 @JEIPlugin
-public final class CampfirePlugin implements IModPlugin
+public final class CampfireJEIPlugin implements IModPlugin
 {
     @Override
     public void register(@Nonnull IModRegistry registry) {
-        registry.handleRecipes(CampfireRecipe.class, CampfireRecipeWrapper::new, CampfireCategory.NAME);
-        registry.addRecipes(CampfireRecipeHandler.getAll(), CampfireCategory.NAME);
+        registry.handleRecipes(CampfireRecipe.class, CampfireJEIRecipeWrapper::new, CampfireJEICategory.NAME);
+        registry.addRecipes(CampfireRecipeHandler.getAll(), CampfireJEICategory.NAME);
 
         final ItemStack campfire = new ItemStack(CampfireItems.CAMPFIRE, 1, OreDictionary.WILDCARD_VALUE);
-        registry.addRecipeCatalyst(campfire, CampfireCategory.NAME);
+        registry.addRecipeCatalyst(campfire, CampfireJEICategory.NAME);
     }
 
     @Override
@@ -40,11 +40,11 @@ public final class CampfirePlugin implements IModPlugin
 
     @Override
     public void registerCategories(@Nonnull IRecipeCategoryRegistration registry) {
-        registry.addRecipeCategories(CampfireCategory.getOrBuildInstance(registry.getJeiHelpers().getGuiHelper()));
+        registry.addRecipeCategories(CampfireJEICategory.getOrBuildInstance(registry.getJeiHelpers().getGuiHelper()));
     }
 
     @Override
     public void onRuntimeAvailable(@Nonnull IJeiRuntime jeiRuntime) {
-        CampfireCategory.catalysts.addAll(jeiRuntime.getRecipeRegistry().getRecipeCatalysts(CampfireCategory.instance));
+        CampfireJEICategory.catalysts.addAll(jeiRuntime.getRecipeRegistry().getRecipeCatalysts(CampfireJEICategory.instance));
     }
 }

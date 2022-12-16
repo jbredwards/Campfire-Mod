@@ -7,6 +7,7 @@ import git.jbredwards.campfire.common.block.state.ColorProperty;
 import git.jbredwards.campfire.common.block.state.ItemStackProperty;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.compat.fluidlogged_api.FluidloggedAPI;
+import git.jbredwards.campfire.common.compat.futuremc.IBeeCalmer;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.init.CampfireSounds;
 import git.jbredwards.campfire.common.item.ItemBlockColored;
@@ -81,7 +82,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("deprecation")
 @Mod.EventBusSubscriber(modid = "campfire")
 @Optional.Interface(modid = "fluidlogged_api", iface = "git.jbredwards.fluidlogged_api.api.block.IFluidloggable")
-public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Block implements ITileEntityProvider, IFluidloggable
+public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Block implements ITileEntityProvider, IFluidloggable, IBeeCalmer
 {
     @Nonnull
     public static final PropertyBool
@@ -464,8 +465,10 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
             //lava particles
             if(rand.nextInt(5) == 0) {
                 final int color = AbstractCampfireTE.getColor(worldIn.getTileEntity(pos));
-                for(int i = 0; i < rand.nextInt(1) + 1; ++i)
-                    ParticleColoredLava.spawnParticle(worldIn, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, color);
+                for(int i = 0; i < rand.nextInt(1) + 1; ++i) {
+                    if(color == -1) worldIn.spawnParticle(EnumParticleTypes.LAVA, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 0, 0, 0);
+                    else ParticleColoredLava.spawnParticle(worldIn, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, color);
+                }
             }
         }
     }

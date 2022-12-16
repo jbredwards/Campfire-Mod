@@ -26,6 +26,8 @@ minecraft {
 dependencies {
     //fluidlogged api
     deobfCompile "com.github.jbredwards:fluidlogged-api:${fluidlogged_api_version}"
+    //hwyla
+    deobfCompile "com.github.TehNut-Mods:HWYLA:${hwyla_version}"
     //jei
     deobfCompile "mezz.jei:jei_1.12.2:${jei_version}"
 }

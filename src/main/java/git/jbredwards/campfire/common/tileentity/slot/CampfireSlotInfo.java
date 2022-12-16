@@ -1,6 +1,7 @@
 package git.jbredwards.campfire.common.tileentity.slot;
 
 import git.jbredwards.campfire.Campfire;
+import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.message.MessageSyncCampfireSlot;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
 import net.minecraft.client.Minecraft;
@@ -10,6 +11,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fml.relauncher.Side;
@@ -73,6 +76,16 @@ public class CampfireSlotInfo implements INBTSerializable<NBTTagCompound>
         }
     }
 
+    public boolean isWithin(double x, double y, double z) {
+        return getBoundingBox().grow(0.001).contains(new Vec3d(x, y, z));
+    }
+
+    @Nonnull
+    public AxisAlignedBB getBoundingBox() {
+        final AxisAlignedBB aabb = new AxisAlignedBB(0.5, 0, 0.5, 0.5, 1, 0.5).offset(offsetX, offsetY, offsetZ);
+        return aabb.grow(CampfireConfigHandler.hasExtraSlots && offsetX != 0 && offsetZ != 0 ? 0.1875 : 0.25);
+    }
+
     @SideOnly(Side.CLIENT)
     public void spawnCookParticles() {
         if(isActive && !output.isEmpty() && tile.getWorld().rand.nextFloat() < 0.2) {
@@ -102,6 +115,7 @@ public class CampfireSlotInfo implements INBTSerializable<NBTTagCompound>
         output = ItemStack.EMPTY;
         cookTime = 0;
         maxCookTime = 0;
+        experience = 0;
     }
 
     @Nonnull

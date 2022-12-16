@@ -21,6 +21,10 @@
         "item":[{
             "submodel":{
                 "ash":[{"model":"campfire:campfire_ash"}],
+                "logs":[{
+                    "model":"campfire:campfire_logs_builtin",
+                    "custom":{"parent":"campfire:campfire#logs"}
+                }],
                 "cutout":[{
                     "model":"campfire:campfire_fire_builtin",
                     "custom":{
@@ -28,10 +32,6 @@
                         "coloredFire":"campfire:blocks/campfire_fire_colored",
                         "coloredAsh":"campfire:blocks/campfire_ash_lit_colored"
                     }
-                }],
-                "logs":[{
-                    "model":"campfire:campfire_logs_builtin",
-                    "custom":{"parent":"campfire:campfire#logs"}
                 }]
             }
         }],

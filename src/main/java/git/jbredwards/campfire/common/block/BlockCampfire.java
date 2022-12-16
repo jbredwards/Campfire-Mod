@@ -122,7 +122,7 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
 
             if(handleFireIgnite(worldIn, pos, state, playerIn, stack)) return true;
             else if(handleFireExtinguish(worldIn, pos, state, playerIn, stack)) return true;
-            else return handleItems(worldIn, pos, state, playerIn, stack, hitX, hitY, hitZ);
+            else return handleItems(worldIn, pos, playerIn, stack, hitX, hitY, hitZ);
         }
 
         return false;
@@ -210,9 +210,9 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
     //HANDLE ITEM COOKING
     //===================
 
-    public boolean handleItems(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer player, @Nonnull ItemStack stack, float hitX, float hitY, float hitZ) {
-        //TODO
-        return false;
+    public boolean handleItems(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull EntityPlayer player, @Nonnull ItemStack stack, float hitX, float hitY, float hitZ) {
+        final TileEntityCampfire tile = (TileEntityCampfire)world.getTileEntity(pos);
+        return tile != null && tile.handleInteract(player, stack, hitX, hitY, hitZ);
     }
 
     //=========

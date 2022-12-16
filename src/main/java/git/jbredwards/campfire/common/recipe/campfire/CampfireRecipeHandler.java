@@ -21,15 +21,19 @@ public final class CampfireRecipeHandler
     static final List<CampfireRecipe> RECIPES = new ArrayList<>();
 
     @Nonnull
-    public static Optional<CampfireRecipe> getFromInput(@Nonnull ItemStack in) {
+    public static Optional<CampfireRecipe> getFromInput(@Nonnull ItemStack in, @Nonnull ItemStack campfireTypeIn) {
         if(in.isEmpty()) return Optional.empty();
         for(CampfireRecipe recipe : RECIPES)
-            if(recipe.canAccept(in)) return Optional.of(recipe);
+            if(recipe.canAccept(in, campfireTypeIn))
+                return Optional.of(recipe);
 
         return Optional.empty();
     }
 
-    public static void removeInput(@Nonnull ItemStack in) { getFromInput(in).ifPresent(RECIPES::remove); }
+    public static void removeInput(@Nonnull ItemStack in) {
+        getFromInput(in, ItemStack.EMPTY).ifPresent(RECIPES::remove);
+    }
+
     public static void removeOutput(@Nonnull ItemStack out) {
         RECIPES.removeIf(recipe -> ItemHandlerHelper.canItemStacksStack(out, recipe.output));
     }

@@ -13,12 +13,15 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -33,10 +36,10 @@ public class BlockBrazier extends AbstractCampfire<TileEntityBrazier>
             //ash
             box(0,  0, 0,  16, 2,  16),
             //cage
-            box(0,      2, 0,      16,    14, 0.001),
-            box(0,      2, 0,      0.001, 14, 16),
-            box(0,      2, 15.999, 16,    14, 16),
-            box(15.999, 2, 0,      16,    14, 16)
+            box(0,  2, 0,  16, 14, 0),
+            box(0,  2, 0,  0,  14, 16),
+            box(0,  2, 16, 16, 14, 16),
+            box(16, 2, 0,  16, 14, 16)
     );
 
     public BlockBrazier(@Nonnull Material materialIn, boolean isSmokeyIn) {
@@ -59,6 +62,12 @@ public class BlockBrazier extends AbstractCampfire<TileEntityBrazier>
     @Override
     public AxisAlignedBB getBoundingBox(@Nonnull IBlockState state, @Nonnull IBlockAccess source, @Nonnull BlockPos pos) {
         return AABB;
+    }
+
+    @Nullable
+    @Override
+    public RayTraceResult collisionRayTrace(@Nonnull IBlockState blockState, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull Vec3d start, @Nonnull Vec3d end) {
+        return rayTrace(pos, start, end, blockState.getBoundingBox(worldIn, pos));
     }
 
     @Nonnull
