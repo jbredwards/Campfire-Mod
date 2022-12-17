@@ -7,6 +7,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -24,7 +25,7 @@ import java.util.Optional;
 final class FutureMCHandler
 {
     @SuppressWarnings("ConstantConditions")
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     static void removeFutureMCCampfireRecipe(@Nonnull RegistryEvent.Register<IRecipe> event) {
         Optional.ofNullable(Block.getBlockFromName("futuremc:campfire")).ifPresent(block -> block.setCreativeTab(null));
         if(event.getRegistry() instanceof IForgeRegistryModifiable)
@@ -32,7 +33,7 @@ final class FutureMCHandler
     }
 
     @SideOnly(Side.CLIENT)
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     static void warnFutureMCCampfireDeprecation(@Nonnull ItemTooltipEvent event) {
         if(String.valueOf(event.getItemStack().getItem().getRegistryName()).equals("futuremc:campfire"))
             event.getToolTip().add(I18n.format("tooltip.campfire.futuremc.deprecated"));

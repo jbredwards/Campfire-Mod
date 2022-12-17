@@ -1,11 +1,16 @@
 package git.jbredwards.campfire.common.recipe.campfire;
 
+import git.jbredwards.campfire.common.config.CampfireConfigHandler;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -28,6 +33,37 @@ public class CampfireRecipe
         this.output = output;
         this.cookTime = cookTime;
         this.experience = experience;
+    }
+
+    @Nonnull
+    public static CampfireRecipe of(@Nonnull List<ItemStack> inputsIn, @Nonnull ItemStack output, int cookTime, float experience) {
+        return of(CampfireConfigHandler.getAllTypes(), inputsIn, output, cookTime, experience);
+    }
+
+    @Nonnull
+    public static CampfireRecipe of(@Nonnull List<ItemStack> campfireTypes, @Nonnull List<ItemStack> inputsIn, @Nonnull ItemStack output, int cookTime, float experience) {
+        final List<ItemStack> inputs = new ArrayList<>();
+        for(Iterator<ItemStack> it = inputsIn.iterator(); it.hasNext();) {
+            final ItemStack input = it.next();
+            if(input.getMetadata() == OreDictionary.WILDCARD_VALUE) {
+                it.remove();
+
+                final NonNullList<ItemStack> tabItems = NonNullList.create();
+                input.getItem().getSubItems(CreativeTabs.SEARCH, tabItems);
+
+                //no duplicate stacks in recipe input
+                tabItems.forEach(stack -> {
+                    if(!CampfireConfigHandler.isStackInList(inputs, stack)) inputs.add(stack);
+                });
+            }
+
+            //no duplicate stacks in recipe input
+            else if(CampfireConfigHandler.isStackInList(inputs, input)) it.remove();
+        }
+
+        inputs.addAll(inputsIn);
+        inputs.removeIf(ItemStack::isEmpty);
+        return new CampfireRecipe(campfireTypes, inputs, output, cookTime, experience);
     }
 
     //when campfire type is empty, skip type check
