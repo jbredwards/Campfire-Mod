@@ -277,8 +277,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
                 final BlockPos pos = result.getBlockPos();
                 final IBlockState state = entity.world.getBlockState(pos);
                 if(state.getBlock() instanceof AbstractCampfire && !state.getValue(LIT))
-                    if(((AbstractCampfire<?>)state.getBlock()).igniteFire(entity.world, pos, state))
-                        event.setCanceled(true);
+                    ((AbstractCampfire<?>) state.getBlock()).igniteFire(entity.world, pos, state);
             }
         }
     }

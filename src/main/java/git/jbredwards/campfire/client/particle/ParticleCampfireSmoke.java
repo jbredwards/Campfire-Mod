@@ -41,7 +41,7 @@ public class ParticleCampfireSmoke extends Particle
             particle.setRBGColorF((color >> 16 & 255) / 255f, (color >> 8 & 255) / 255f, (color & 255) / 255f);
         }
 
-        else particle.setRBGColorF(129 / 255f, 123 / 255f, 116 / 255f); //default particle color
+        else particle.setRBGColorF(198 / 255f, 191 / 255f, 184 / 255f); //default particle color
         particle.setAlphaF(longLivingEmber ? 0.95f : 0.9f);
         Minecraft.getMinecraft().effectRenderer.addEffect(particle);
     }

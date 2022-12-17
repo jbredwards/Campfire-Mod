@@ -65,5 +65,17 @@ processResources {
     }
 }
 
-//AT
-jar{manifest{attributes('FMLAT':'campfire_at.cfg')}}
+//for applying asm outside dev environment
+jar {
+    manifest {
+        attributes(
+                'FMLCorePlugin': 'git.jbredwards.campfire.asm.ASMHandler',
+                'FMLCorePluginContainsFMLMod': 'true',
+                'FMLAT':'campfire_at.cfg'
+        )
+    }
+}
+
+//for applying asm with intellij
+runClient { jvmArgs '-Dfml.coreMods.load=git.jbredwards.campfire.asm.ASMHandler' }
+runServer { jvmArgs '-Dfml.coreMods.load=git.jbredwards.campfire.asm.ASMHandler' }
