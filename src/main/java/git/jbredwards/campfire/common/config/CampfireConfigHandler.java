@@ -133,19 +133,19 @@ public final class CampfireConfigHandler
         try {
             final JsonObject logs = new JsonParser().parse(IOUtils.toString(stream, Charset.defaultCharset())).getAsJsonObject();
             //whitelist
-            if(logs.has("whitelist")) {
-                final List<ItemStack> whitelist = new ArrayList<>();
-                logs.getAsJsonArray("whitelist").forEach(element -> addNonDuplicateStack(whitelist,
+            if(logs.has("add")) {
+                final List<ItemStack> add = new ArrayList<>();
+                logs.getAsJsonArray("add").forEach(element -> addNonDuplicateStack(add,
                         ItemStackDeserializer.INSTANCE.deserialize(element, null, null)));
-                whitelist.removeIf(stack -> isStackInList(types, stack));
-                types.addAll(whitelist);
+                add.removeIf(stack -> isStackInList(types, stack));
+                types.addAll(add);
             }
             //blacklist
-            if(logs.has("blacklist")) {
-                final List<ItemStack> blacklist = new ArrayList<>();
-                logs.getAsJsonArray("blacklist").forEach(element -> addNonDuplicateStack(blacklist,
+            if(logs.has("remove")) {
+                final List<ItemStack> remove = new ArrayList<>();
+                logs.getAsJsonArray("remove").forEach(element -> addNonDuplicateStack(remove,
                         ItemStackDeserializer.INSTANCE.deserialize(element, null, null)));
-                types.removeIf(stack -> isStackInList(blacklist, stack));
+                types.removeIf(stack -> isStackInList(remove, stack));
             }
         }
         //oops
