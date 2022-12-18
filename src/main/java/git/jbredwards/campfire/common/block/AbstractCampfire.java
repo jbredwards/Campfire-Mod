@@ -54,6 +54,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -479,6 +480,14 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
         }
 
         return state;
+    }
+
+    //fix specifically for better foliage, WHY DOES IT RENDER CUTOUT_MIPPED FOR EVERY BLOCK IN THE GAME LMAO
+    @Nonnull
+    @Override
+    public EnumBlockRenderType getRenderType(@Nonnull IBlockState state) {
+        return MinecraftForgeClient.getRenderLayer() == BlockRenderLayer.CUTOUT_MIPPED
+                ? EnumBlockRenderType.INVISIBLE : EnumBlockRenderType.MODEL;
     }
 
     //===============
