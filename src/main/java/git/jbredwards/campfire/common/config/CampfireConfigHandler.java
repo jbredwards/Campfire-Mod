@@ -48,8 +48,11 @@ public final class CampfireConfigHandler
     @Config.LangKey("config.campfire.hasExtraSlots")
     public static boolean hasExtraSlots = true;
 
-    @Config.LangKey("config.campfire.isBurningBlock")
-    public static boolean isBurningBlock = true;
+    @Config.LangKey("config.campfire.isBrazierBurningBlock")
+    public static boolean isBrazierBurningBlock = true;
+
+    @Config.LangKey("config.campfire.isCampfireBurningBlock")
+    public static boolean isCampfireBurningBlock = true;
 
     @Config.LangKey("config.campfire.poweredAction")
     @Nonnull public static PoweredAction poweredAction = PoweredAction.COLOR;
@@ -60,6 +63,7 @@ public final class CampfireConfigHandler
     @Nonnull
     public static List<ItemStack> getAllTypes() { return Collections.unmodifiableList(TYPES); }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static void buildTypes() {
         final List<ItemStack> types = new ArrayList<>();
         //autogenerate initial campfire logs based on oredict
@@ -93,6 +97,7 @@ public final class CampfireConfigHandler
         TYPES.removeIf(ItemStack::isEmpty);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static void buildRecipes() {
         //autogenerate campfire recipes based on furnace food recipes
         FurnaceRecipes.instance().getSmeltingList().forEach((in, out) -> {

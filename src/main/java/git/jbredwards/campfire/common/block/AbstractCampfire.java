@@ -283,11 +283,6 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     }
 
     @Override
-    public boolean isBurning(@Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
-        return CampfireConfigHandler.isBurningBlock && world.getBlockState(pos).getValue(LIT);
-    }
-
-    @Override
     public void onEntityCollision(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull Entity entityIn) {
         if(entityIn instanceof EntityPlayer && !((EntityPlayer)entityIn).isAllowEdit()) return;
         if(!worldIn.isRemote && entityIn.posY < pos.getY() + 0.5 && entityIn.isBurning() && !state.getValue(LIT))

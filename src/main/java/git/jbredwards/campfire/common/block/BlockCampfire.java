@@ -128,6 +128,11 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
         return false;
     }
 
+    @Override
+    public boolean isBurning(@Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
+        return CampfireConfigHandler.isCampfireBurningBlock && world.getBlockState(pos).getValue(LIT);
+    }
+
     //============
     //ITEM HELPERS
     //============

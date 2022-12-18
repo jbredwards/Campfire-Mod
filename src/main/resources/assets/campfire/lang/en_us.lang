@@ -10,3 +10,18 @@ tooltip.campfire.futuremc.deprecated=THIS ITEM IS DEPRECATED!!!
 gui.campfire.jei.category.campfire=Campfire
 gui.campfire.jei.category.campfire.cookTime=%s s
 gui.campfire.jei.category.campfire.experience=%s XP
+//config
+config.campfire.brazierEmitsSmoke=Braziers Emit Smoke
+config.campfire.brazierEmitsSmoke.tooltip=While enabled, braziers emit smoke particles.
+config.campfire.campfireEmitsSmoke=Campfires Emit Smoke
+config.campfire.campfireEmitsSmoke.tooltip=While enabled, campfires emit smoke particles.
+config.campfire.doesSmokeFollowDye=Smoke Follows Dye
+config.campfire.doesSmokeFollowDye.tooltip=While enabled, smoke will be automatically dyed the same color as the block it's coming from.
+config.campfire.hasExtraSlots=Campfires Have Extra Slots
+config.campfire.hasExtraSlots.tooltip=While enabled, campfires have 8 interactive slots instead of vanilla's 4.
+config.campfire.isBrazierBurningBlock=Braziers Burn Entities
+config.campfire.isBrazierBurningBlock.tooltip=While enabled, braziers burn entities.
+config.campfire.isCampfireBurningBlock=Campfires Burn Entities
+config.campfire.isCampfireBurningBlock.tooltip=While enabled, campfires burn entities.
+config.campfire.poweredAction=Redstone Powered Action
+config.campfire.poweredAction.tooltip=Controls what this does while powered: (IGNORE = emited smoke is the default color; COLOR = emited smoke is the same color as the block below (map color); DISABLE = no smoke is emited)

@@ -89,4 +89,9 @@ public class BlockBrazier extends AbstractCampfire<TileEntityBrazier>
 
     @Override
     public boolean isSmokey() { return isSmokey && CampfireConfigHandler.brazierEmitsSmoke; }
+
+    @Override
+    public boolean isBurning(@Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
+        return CampfireConfigHandler.isBrazierBurningBlock && world.getBlockState(pos).getValue(LIT);
+    }
 }
