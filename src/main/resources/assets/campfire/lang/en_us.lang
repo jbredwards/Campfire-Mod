@@ -5,7 +5,7 @@ tile.campfire.campfire.name=Campfire
 regex.campfire.target=$
 regex.campfire.replacement= Campfire
 //futuremc
-tooltip.campfire.futuremc.deprecated=THIS ITEM IS DEPRECATED!!!
+tooltip.campfire.futuremc.deprecated=This item is deprecated!
 //jei
 gui.campfire.jei.category.campfire=Campfire
 gui.campfire.jei.category.campfire.cookTime=%s s
