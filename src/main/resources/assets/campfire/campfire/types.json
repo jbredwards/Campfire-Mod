@@ -1,5 +1,5 @@
 {
-    "blacklist":[
+    "remove":[
         {"id":"biomesoplenty:log_4","Damage":4},
         {"id":"natura:redwood_logs","Damage":32767}
     ]
