@@ -80,9 +80,7 @@ public class CampfireJEICategory extends FurnaceRecipeCategory<CampfireJEIRecipe
     public IDrawable getIcon() { return icon; }
 
     @Override
-    public void drawExtras(@Nonnull Minecraft minecraft) {
-        staticFlame.draw(minecraft, 1, 20);
-    }
+    public void drawExtras(@Nonnull Minecraft minecraft) { staticFlame.draw(minecraft, 1, 20); }
 
     @Override
     public void setRecipe(@Nonnull IRecipeLayout recipeLayout, @Nonnull CampfireJEIRecipeWrapper recipeWrapper, @Nonnull IIngredients ingredients) {
@@ -106,5 +104,6 @@ public class CampfireJEICategory extends FurnaceRecipeCategory<CampfireJEIRecipe
 
         guiItemStacks.init(fuelSlot, false, 0, 36);
         guiItemStacks.set(fuelSlot, campfires);
+        recipeLayout.setShapeless();
     }
 }

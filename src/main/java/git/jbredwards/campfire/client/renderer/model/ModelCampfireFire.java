@@ -9,6 +9,7 @@ import git.jbredwards.campfire.common.item.ItemBlockColored;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.entity.EntityLivingBase;
@@ -41,7 +42,7 @@ import java.util.function.Function;
 public final class ModelCampfireFire implements IModel
 {
     @Nonnull
-    static final ModelCampfireFire DEFAULT = new ModelCampfireFire(new ResourceLocation("missing"), new ResourceLocation("missing"), new ResourceLocation("missing"));
+    static final ModelCampfireFire DEFAULT = new ModelCampfireFire(TextureMap.LOCATION_MISSING_TEXTURE, TextureMap.LOCATION_MISSING_TEXTURE, TextureMap.LOCATION_MISSING_TEXTURE);
 
     @Nonnull
     final ResourceLocation parent, coloredFire, coloredAsh;

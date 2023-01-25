@@ -17,9 +17,10 @@ public class BrazierRecipe extends ShapedOreRecipe
 {
     @Nonnull
     protected final Item campfire;
-    public BrazierRecipe(@Nonnull Item campfire, @Nonnull Item brazier) {
-        super(null, brazier, "III", "ICI", "III", 'I', "nuggetIron", 'C', campfire);
-        this.campfire = campfire;
+    public BrazierRecipe(@Nonnull Item campfireIn, @Nonnull Item brazier) {
+        super(null, brazier, "III", "ICI", "III", 'I', "nuggetIron", 'C', campfireIn);
+        setRegistryName(brazier.delegate.name().getPath());
+        campfire = campfireIn;
     }
 
     @Nonnull
@@ -34,6 +35,8 @@ public class BrazierRecipe extends ShapedOreRecipe
             }
         }
 
-        return ItemBlockColored.applyColor(super.getCraftingResult(inv), ItemBlockColored.getColor(input));
+        final ItemStack result = super.getCraftingResult(inv);
+        result.setItemDamage(input.getMetadata());
+        return ItemBlockColored.applyColor(result, ItemBlockColored.getColor(input));
     }
 }

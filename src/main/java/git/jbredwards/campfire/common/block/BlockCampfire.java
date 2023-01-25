@@ -7,8 +7,11 @@ import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.item.ItemBlockColored;
 import git.jbredwards.campfire.common.item.ItemCampfire;
+import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipe;
+import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipeHandler;
 import git.jbredwards.campfire.common.tileentity.AbstractCampfireTE;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
+import git.jbredwards.campfire.common.tileentity.slot.CampfireSlotInfo;
 import git.jbredwards.fluidlogged_api.api.util.FluidState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.EnumPushReaction;
@@ -20,6 +23,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
@@ -30,12 +34,14 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -150,7 +156,8 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
     @Nonnull
     @Override
     public IBlockState getStateForPlacement(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ, int meta, @Nonnull EntityLivingBase placer) {
-        return getDefaultState().withProperty(X_AXIS, placer.getHorizontalFacing().getAxis() == EnumFacing.Axis.X);
+        return super.getStateForPlacement(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer)
+                .withProperty(X_AXIS, placer.getHorizontalFacing().getAxis() == EnumFacing.Axis.X);
     }
 
     @Override
@@ -216,8 +223,68 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
     //===================
 
     public boolean handleItems(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull EntityPlayer player, @Nonnull ItemStack stack, float hitX, float hitY, float hitZ) {
-        final TileEntityCampfire tile = (TileEntityCampfire)world.getTileEntity(pos);
-        return tile != null && tile.handleInteract(player, stack, hitX, hitY, hitZ);
+        final TileEntity tile = world.getTileEntity(pos);
+        if(!(tile instanceof TileEntityCampfire)) return false;
+
+        final ICampfireType type = ICampfireType.get(tile);
+        if(type == null) return false;
+
+        for(CampfireSlotInfo slot : ((TileEntityCampfire)tile).slotInfo) {
+            if(slot.isWithin(hitX, hitY, hitZ)) {
+                //pop off item in slot
+                if(!slot.stack.isEmpty()) {
+                    if(!world.isRemote) {
+                        //calculate initial exp amount
+                        if(slot.output.isEmpty()) {
+                            int exp = slot.output.getCount();
+                            if(slot.experience == 0) exp = 0;
+                            else if(slot.experience < 1) {
+                                int j = MathHelper.floor(exp * slot.experience);
+                                if(j < MathHelper.ceil(exp * slot.experience) && Math.random() < (exp * slot.experience - j)) ++j;
+                                exp = j;
+                            }
+
+                            //create exp orbs
+                            while(exp > 0) {
+                                final int expAmount = EntityXPOrb.getXPSplit(exp);
+                                exp -= expAmount;
+                                world.spawnEntity(new EntityXPOrb(world, player.posX, player.posY, player.posZ, expAmount));
+                            }
+                        }
+
+                        ItemHandlerHelper.giveItemToPlayer(player, slot.stack);
+                        slot.reset();
+                        slot.sendToTracking();
+                    }
+
+                    return true;
+                }
+
+                //insert item into campfire
+                if(!slot.isActive || stack.isEmpty()) return false;
+                else if(!world.isRemote) {
+                    getRecipeFromInput(stack, type.get()).ifPresent(campfireRecipe -> {
+                        slot.output = campfireRecipe.output;
+                        slot.maxCookTime = campfireRecipe.cookTime;
+                        slot.experience = campfireRecipe.experience;
+                    });
+
+                    slot.stack = ItemHandlerHelper.copyStackWithSize(stack, 1);
+                    slot.sendToTracking();
+
+                    if(!player.isCreative()) stack.shrink(1);
+                }
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Nonnull
+    protected java.util.Optional<CampfireRecipe> getRecipeFromInput(@Nonnull ItemStack stack, @Nonnull ItemStack type) {
+        return CampfireRecipeHandler.getFromInput(stack, type);
     }
 
     //=========

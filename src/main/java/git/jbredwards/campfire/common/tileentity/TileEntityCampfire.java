@@ -1,27 +1,17 @@
 package git.jbredwards.campfire.common.tileentity;
 
-import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
-import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipe;
-import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipeHandler;
 import git.jbredwards.campfire.common.tileentity.slot.CampfireSlotInfo;
-import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  *
@@ -88,64 +78,6 @@ public class TileEntityCampfire extends AbstractCampfireTE
                 slot.reset();
             }
         }
-    }
-
-    public boolean handleInteract(@Nonnull EntityPlayer player, @Nonnull ItemStack stack, float hitX, float hitY, float hitZ) {
-        final @Nullable ICampfireType type = ICampfireType.get(this);
-        if(type != null) {
-            for(CampfireSlotInfo slot : slotInfo) {
-                if(slot.isWithin(hitX, hitY, hitZ)) {
-                    //pop off item in slot
-                    if(!slot.stack.isEmpty()) {
-                        if(!world.isRemote) {
-                            //calculate initial exp amount
-                            if(slot.output.isEmpty()) {
-                                int exp = slot.output.getCount();
-                                if(slot.experience == 0) exp = 0;
-                                else if(slot.experience < 1) {
-                                    int j = MathHelper.floor(exp * slot.experience);
-                                    if(j < MathHelper.ceil(exp * slot.experience) && Math.random() < (exp * slot.experience - j)) ++j;
-                                    exp = j;
-                                }
-
-                                //create exp orbs
-                                while(exp > 0) {
-                                    final int expAmount = EntityXPOrb.getXPSplit(exp);
-                                    exp -= expAmount;
-                                    world.spawnEntity(new EntityXPOrb(world, player.posX, player.posY, player.posZ, expAmount));
-                                }
-                            }
-
-                            ItemHandlerHelper.giveItemToPlayer(player, slot.stack);
-                            slot.reset();
-                            slot.sendToTracking();
-                        }
-
-                        return true;
-                    }
-
-                    //insert item into campfire
-                    if(!slot.isActive || stack.isEmpty()) return false;
-                    else if(!world.isRemote) {
-                        final Optional<CampfireRecipe> recipe = CampfireRecipeHandler.getFromInput(stack, type.get());
-                        recipe.ifPresent(campfireRecipe -> {
-                            slot.output = campfireRecipe.output;
-                            slot.maxCookTime = campfireRecipe.cookTime;
-                            slot.experience = campfireRecipe.experience;
-                        });
-
-                        slot.stack = ItemHandlerHelper.copyStackWithSize(stack, 1);
-                        slot.sendToTracking();
-
-                        if(!player.isCreative()) stack.shrink(1);
-                    }
-
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     @SideOnly(Side.CLIENT)
