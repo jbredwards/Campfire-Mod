@@ -56,11 +56,11 @@ final class ClientRegistryHandler
         ModelLoaderRegistry.registerLoader(ModelCampfireFire.Loader.INSTANCE);
         ModelLoaderRegistry.registerLoader(ModelCampfireLogs.Loader.INSTANCE);
 
-        ModelLoader.setCustomModelResourceLocation(CampfireItems.BRAZIER, 0,
-                new ModelResourceLocation(String.valueOf(CampfireItems.BRAZIER.getRegistryName()), "inventory"));
+        ModelLoader.setCustomModelResourceLocation(CampfireItems.BRAZIER, 0, new ModelResourceLocation("campfire:brazier", "inventory"));
+        ModelLoader.setCustomModelResourceLocation(CampfireItems.BRAZIER, 1, new ModelResourceLocation("campfire:brazier", "inventory_unlit"));
 
-        ModelLoader.setCustomModelResourceLocation(CampfireItems.CAMPFIRE, 0,
-                new ModelResourceLocation(String.valueOf(CampfireItems.CAMPFIRE.getRegistryName()), "inventory"));
+        ModelLoader.setCustomModelResourceLocation(CampfireItems.CAMPFIRE, 0, new ModelResourceLocation("campfire:campfire", "inventory"));
+        ModelLoader.setCustomModelResourceLocation(CampfireItems.CAMPFIRE, 1, new ModelResourceLocation("campfire:campfire", "inventory_unlit"));
     }
 
     @SubscribeEvent

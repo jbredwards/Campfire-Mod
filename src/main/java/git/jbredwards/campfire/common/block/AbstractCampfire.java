@@ -92,7 +92,6 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
             SIGNAL = PropertyBool.create("signal");
 
     protected final boolean isSmokey;
-
     public AbstractCampfire(@Nonnull Material materialIn, boolean isSmokeyIn) {
         this(materialIn, materialIn.getMaterialMapColor(), isSmokeyIn);
     }
@@ -100,6 +99,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     public AbstractCampfire(@Nonnull Material materialIn, @Nonnull MapColor mapColorIn, boolean isSmokeyIn) {
         super(materialIn, mapColorIn);
         isSmokey = isSmokeyIn;
+        setTickRandomly(true);
         setDefaultState(getDefaultState().withProperty(POWERED, false).withProperty(SIGNAL, false));
     }
 
@@ -161,7 +161,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     @Nonnull
     @Override
     public IBlockState getStateForPlacement(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ, int meta, @Nonnull EntityLivingBase placer) {
-        return getDefaultState();
+        return meta == 1 ? getDefaultState().withProperty(LIT, false) : getDefaultState();
     }
 
     @Override
@@ -180,7 +180,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     @Override
     public ItemStack getItem(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
         final @Nullable TileEntity tile = worldIn.getTileEntity(pos);
-        final ItemStack stack = new ItemStack(this);
+        final ItemStack stack = new ItemStack(this, 1, state.getValue(LIT) ? 0 : 1);
 
         return tile instanceof AbstractCampfireTE ? ItemBlockColored.applyColor(stack, AbstractCampfireTE.getColor(tile)) : stack;
     }
@@ -199,8 +199,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
         //ensure silk touch drop captures type stored in tile entity
         if(canSilkHarvest(worldIn, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0) {
             final List<ItemStack> drops = new ArrayList<>();
-            drops.add(ItemBlockColored.applyColor(new ItemStack(this), AbstractCampfireTE.getColor(te)));
-
+            drops.add(ItemBlockColored.applyColor(new ItemStack(this, 1, state.getValue(LIT) ? 0 : 1), AbstractCampfireTE.getColor(te)));
             ForgeEventFactory.fireBlockHarvesting(drops, worldIn, pos, state, 0, 1, true, player);
             drops.forEach(drop -> spawnAsEntity(worldIn, pos, drop));
         }
@@ -263,7 +262,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
                     final BlockPos pos = result.getBlockPos();
                     final IBlockState state = entity.world.getBlockState(pos);
                     if(state.getBlock() instanceof AbstractCampfire && state.getValue(LIT))
-                        ((AbstractCampfire<?>)state.getBlock()).extinguishFire(entity.world, pos, state);
+                        ((AbstractCampfire<?>)state.getBlock()).extinguishFire(entity.world, pos, state, true);
                 }
             }
             //snowballs extinguish fire
@@ -271,14 +270,14 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
                 final BlockPos pos = result.getBlockPos();
                 final IBlockState state = entity.world.getBlockState(pos);
                 if(state.getBlock() instanceof AbstractCampfire && state.getValue(LIT))
-                    ((AbstractCampfire<?>)state.getBlock()).extinguishFire(entity.world, pos, state);
+                    ((AbstractCampfire<?>)state.getBlock()).extinguishFire(entity.world, pos, state, true);
             }
             //entities on fire ignite it
             else if(entity.isBurning()) {
                 final BlockPos pos = result.getBlockPos();
                 final IBlockState state = entity.world.getBlockState(pos);
                 if(state.getBlock() instanceof AbstractCampfire && !state.getValue(LIT))
-                    ((AbstractCampfire<?>) state.getBlock()).igniteFire(entity.world, pos, state);
+                    ((AbstractCampfire<?>)state.getBlock()).igniteFire(entity.world, pos, state);
             }
         }
     }
@@ -314,7 +313,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
 
     public boolean handleFireExtinguish(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer playerIn, @Nonnull ItemStack stack) {
         if(state.getValue(LIT) && stack.getItem().getToolClasses(stack).contains("shovel")) {
-            extinguishFire(worldIn, pos, state);
+            extinguishFire(worldIn, pos, state, true);
             stack.damageItem(1, playerIn);
             return true;
         }
@@ -322,15 +321,15 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
         return false;
     }
 
-    public void extinguishFire(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
+    public void extinguishFire(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state, boolean playSound) {
         final @Nullable TileEntity tile = world.getTileEntity(pos);
         if(tile instanceof AbstractCampfireTE) {
             if(world.isRemote) playExtinguishEffects(world, pos, (AbstractCampfireTE)tile, 0.4);
-            ((AbstractCampfireTE)tile).color = -1;
+            if(CampfireConfigHandler.resetDyeOnExtinguish) ((AbstractCampfireTE)tile).color = -1;
         }
 
         world.setBlockState(pos, state.withProperty(LIT, false));
-        if(!world.isRemote) world.playEvent(Constants.WorldEvents.FIRE_EXTINGUISH_SOUND, pos, 0);
+        if(playSound && !world.isRemote) world.playEvent(Constants.WorldEvents.FIRE_EXTINGUISH_SOUND, pos, 0);
     }
 
     public boolean igniteFire(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
@@ -340,6 +339,16 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
         }
 
         return false;
+    }
+
+    public boolean canBurnOut() { return isSmokey && CampfireConfigHandler.canBurnOut; }
+    public boolean canRainExtinguish(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
+        return canBurnOut() && state.getValue(LIT) && world.getGameRules().getBoolean("doFireTick") && world.isRainingAt(pos.up());
+    }
+
+    @Override
+    public void randomTick(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull Random random) {
+        if(canRainExtinguish(worldIn, pos, state) && random.nextFloat() < 0.25) extinguishFire(worldIn, pos, state, false);
     }
 
     //=========
@@ -581,7 +590,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
             final IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(type.get());
             final TextureAtlasSprite tex = model.getOverrides().handleItemState(model, type.get(), null, null).getParticleTexture();
 
-            final int particleCount = 64; //value must have only one true bit
+            final int particleCount = 0b1000000; //64 (value must have only one true bit)
             final int particlesPer = particleCount >> 4;
             for(int i = 0; i < particleCount; i++) {
                 final int ix = i & particlesPer - 1;
@@ -611,7 +620,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     @Nonnull
     @Override
     public EnumActionResult onFluidFill(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState here, @Nonnull FluidState newFluid, int blockFlags) {
-        if(here.getValue(LIT)) extinguishFire(world, pos, here);
+        if(here.getValue(LIT)) extinguishFire(world, pos, here, true);
         return EnumActionResult.PASS;
     }
 

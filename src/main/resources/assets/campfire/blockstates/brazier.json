@@ -17,6 +17,10 @@
             "model":"campfire:inventory_builtin",
             "custom":{"parent":"campfire:brazier#item"}
         }],
+        "inventory_unlit":[{
+            "model":"campfire:inventory_builtin",
+            "custom":{"parent":"campfire:brazier#item_unlit"}
+        }],
         "item":[{
             "submodel":{
                 "ash":[{"model":"campfire:brazier_ash"}],
@@ -29,6 +33,12 @@
                         "coloredAsh":"campfire:blocks/brazier_ash_lit_colored"
                     }
                 }]
+            }
+        }],
+        "item_unlit":[{
+            "submodel":{
+                "ash":[{"model":"campfire:brazier_ash"}],
+                "cage":[{"model":"campfire:brazier_cage"}]
             }
         }],
         "lit":{

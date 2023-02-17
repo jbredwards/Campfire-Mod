@@ -1,5 +1,6 @@
 package git.jbredwards.campfire.common.recipe.crafting;
 
+import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.item.ItemBlockColored;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
@@ -13,14 +14,26 @@ import javax.annotation.Nonnull;
  * @author jbred
  *
  */
-public class BrazierRecipe extends ShapedOreRecipe
+public class BrazierCraftingRecipe extends ShapedOreRecipe
 {
     @Nonnull
-    protected final Item campfire;
-    public BrazierRecipe(@Nonnull Item campfireIn, @Nonnull Item brazier) {
+    public final Item campfire;
+    public BrazierCraftingRecipe(@Nonnull Item campfireIn, @Nonnull Item brazier) {
         super(null, brazier, "III", "ICI", "III", 'I', "nuggetIron", 'C', campfireIn);
         setRegistryName(brazier.delegate.name().getPath());
         campfire = campfireIn;
+    }
+
+    @Nonnull
+    @Override
+    public ItemStack getRecipeOutput() {
+        if(CampfireConfigHandler.unlitOnCraft) {
+            final ItemStack unlit = super.getRecipeOutput().copy();
+            unlit.setItemDamage(1);
+            return unlit;
+        }
+
+        return super.getRecipeOutput();
     }
 
     @Nonnull

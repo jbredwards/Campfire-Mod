@@ -23,8 +23,8 @@ public enum CampfireRecipeDeserializer implements JsonDeserializer<CampfireRecip
     @Override
     public CampfireRecipe deserialize(@Nonnull JsonElement jsonIn, @Nullable Type typeOfT, @Nullable JsonDeserializationContext context) throws JsonParseException {
         final JsonObject json = jsonIn.getAsJsonObject();
-        if(!json.has("output")) throw new JsonSyntaxException("No Provided Output for Recipe: " + jsonIn.toString());
-        if(!json.has("inputs")) throw new JsonSyntaxException("No Provided Inputs for Recipe: " + jsonIn.toString());
+        if(!json.has("output")) throw new JsonSyntaxException("No Provided Output for Recipe: " + jsonIn);
+        if(!json.has("inputs")) throw new JsonSyntaxException("No Provided Inputs for Recipe: " + jsonIn);
 
         //gather inputs
         final List<ItemStack> inputs = new ArrayList<>();

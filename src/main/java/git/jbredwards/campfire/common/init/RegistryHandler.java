@@ -4,6 +4,7 @@ import git.jbredwards.campfire.common.tileentity.TileEntityBrazier;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.event.RegistryEvent;
@@ -33,10 +34,12 @@ final class RegistryHandler
     @SubscribeEvent
     static void registerItem(@Nonnull RegistryEvent.Register<Item> event) {
         event.getRegistry().register(CampfireItems.BRAZIER.setRegistryName("brazier"));
-        OreDictionary.registerOre("campfire", CampfireItems.BRAZIER);
+        OreDictionary.registerOre("campfire", new ItemStack(CampfireItems.BRAZIER, 1, 0));
+        OreDictionary.registerOre("campfire", new ItemStack(CampfireItems.BRAZIER, 1, 1));
 
         event.getRegistry().register(CampfireItems.CAMPFIRE.setRegistryName("campfire"));
-        OreDictionary.registerOre("campfire", CampfireItems.CAMPFIRE);
+        OreDictionary.registerOre("campfire", new ItemStack(CampfireItems.CAMPFIRE, 1, 0));
+        OreDictionary.registerOre("campfire", new ItemStack(CampfireItems.CAMPFIRE, 1, 1));
     }
 
     @SubscribeEvent

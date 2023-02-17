@@ -27,9 +27,17 @@ public class CampfireCraftingRecipe extends ShapedOreRecipe
 
     @Nonnull
     @Override
-    public ItemStack getCraftingResult(@Nonnull InventoryCrafting inv) {
-        final ItemStack result = super.getCraftingResult(inv);
-        if(CampfireConfigHandler.unlitOnCraft) result.setItemDamage(1);
-        return result;
+    public ItemStack getRecipeOutput() {
+        if(CampfireConfigHandler.unlitOnCraft) {
+            final ItemStack unlit = super.getRecipeOutput().copy();
+            unlit.setItemDamage(1);
+            return unlit;
+        }
+
+        return super.getRecipeOutput();
     }
+
+    @Nonnull
+    @Override
+    public ItemStack getCraftingResult(@Nonnull InventoryCrafting inv) { return getRecipeOutput().copy(); }
 }

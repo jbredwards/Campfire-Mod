@@ -4,6 +4,8 @@ tile.campfire.campfire.name=Campfire
 //regex
 regex.campfire.target=$
 regex.campfire.replacement= Campfire
+//subtitles
+subtitles.campfire.crackle=Campfire crackles
 //futuremc
 tooltip.campfire.futuremc.deprecated=This item is deprecated!
 //jei

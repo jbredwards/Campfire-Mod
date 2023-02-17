@@ -42,6 +42,9 @@ public final class CampfireConfigHandler
     @Config.LangKey("config.campfire.campfireEmitsSmoke")
     public static boolean campfireEmitsSmoke = true;
 
+    @Config.LangKey("config.campfire.canBurnOut")
+    public static boolean canBurnOut = false;
+
     @Config.LangKey("config.campfire.doesSmokeFollowDye")
     public static boolean doesSmokeFollowDye = true;
 
@@ -53,6 +56,12 @@ public final class CampfireConfigHandler
 
     @Config.LangKey("config.campfire.isCampfireBurningBlock")
     public static boolean isCampfireBurningBlock = true;
+
+    @Config.LangKey("config.campfire.resetDyeOnExtinguish")
+    public static boolean resetDyeOnExtinguish = true;
+
+    @Config.LangKey("config.campfire.unlitOnCraft")
+    public static boolean unlitOnCraft = false;
 
     @Config.LangKey("config.campfire.poweredAction")
     @Nonnull public static PoweredAction poweredAction = PoweredAction.COLOR;

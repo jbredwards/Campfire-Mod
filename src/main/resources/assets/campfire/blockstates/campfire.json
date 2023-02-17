@@ -18,6 +18,10 @@
             "model":"campfire:inventory_builtin",
             "custom":{"parent":"campfire:campfire#item"}
         }],
+        "inventory_unlit":[{
+            "model":"campfire:inventory_builtin",
+            "custom":{"parent":"campfire:campfire#item_unlit"}
+        }],
         "item":[{
             "submodel":{
                 "ash":[{"model":"campfire:campfire_ash"}],
@@ -32,6 +36,15 @@
                         "coloredFire":"campfire:blocks/campfire_fire_colored",
                         "coloredAsh":"campfire:blocks/campfire_ash_lit_colored"
                     }
+                }]
+            }
+        }],
+        "item_unlit":[{
+            "submodel":{
+                "ash":[{"model":"campfire:campfire_ash"}],
+                "logs":[{
+                    "model":"campfire:campfire_logs_builtin",
+                    "custom":{"parent":"campfire:campfire#logs"}
                 }]
             }
         }],

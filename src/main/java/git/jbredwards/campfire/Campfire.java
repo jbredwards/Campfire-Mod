@@ -27,7 +27,7 @@ import javax.annotation.Nonnull;
  * @author jbred
  *
  */
-@Mod(modid = "campfire", name = "Campfire", version = "1.0.1")
+@Mod(modid = "campfire", name = "Campfire", version = "1.1.0")
 public final class Campfire
 {
     public static final boolean isFluidloggedAPI = Loader.isModLoaded("fluidlogged_api");
@@ -41,11 +41,11 @@ public final class Campfire
         wrapper.registerMessage(MessageFallParticles.Handler.INSTANCE, MessageFallParticles.class, 0, Side.CLIENT);
         wrapper.registerMessage(MessageSyncCampfireSlot.Handler.INSTANCE, MessageSyncCampfireSlot.class, 1, Side.CLIENT);
         CapabilityManager.INSTANCE.register(ICampfireType.class, ICampfireType.Storage.INSTANCE, ICampfireType.Impl::new);
-        if(event.getSide().isClient()) registerTESR();
     }
 
     @SideOnly(Side.CLIENT)
-    static void registerTESR() {
+    @Mod.EventHandler
+    static void preInitClient(@Nonnull FMLPreInitializationEvent event) {
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCampfire.class, new CampfireTESR());
     }
 

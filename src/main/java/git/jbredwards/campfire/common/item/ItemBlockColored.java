@@ -21,7 +21,10 @@ import javax.annotation.Nullable;
  */
 public class ItemBlockColored extends ItemBlock
 {
-    public ItemBlockColored(@Nonnull Block block) { super(block); }
+    public ItemBlockColored(@Nonnull Block block) {
+        super(block);
+        setHasSubtypes(true);
+    }
 
     @Override
     public boolean placeBlockAt(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull IBlockState newState) {
@@ -55,4 +58,7 @@ public class ItemBlockColored extends ItemBlock
 
         return campfire;
     }
+
+    @Override
+    public int getMetadata(int damage) { return damage & 1; }
 }
