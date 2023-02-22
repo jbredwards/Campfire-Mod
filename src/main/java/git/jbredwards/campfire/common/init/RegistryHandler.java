@@ -29,6 +29,8 @@ final class RegistryHandler
 
         event.getRegistry().register(CampfireBlocks.CAMPFIRE.setRegistryName("campfire").setTranslationKey("campfire.campfire"));
         TileEntity.register("campfire:campfire", TileEntityCampfire.class);
+
+        event.getRegistry().register(CampfireBlocks.CAMPFIRE_ASH.setRegistryName("campfire_ash").setTranslationKey("campfire.campfire_ash"));
     }
 
     @SubscribeEvent
@@ -40,6 +42,8 @@ final class RegistryHandler
         event.getRegistry().register(CampfireItems.CAMPFIRE.setRegistryName("campfire"));
         OreDictionary.registerOre("campfire", new ItemStack(CampfireItems.CAMPFIRE, 1, 0));
         OreDictionary.registerOre("campfire", new ItemStack(CampfireItems.CAMPFIRE, 1, 1));
+
+        event.getRegistry().register(CampfireItems.CAMPFIRE_ASH.setRegistryName("campfire_ash"));
     }
 
     @SubscribeEvent

@@ -34,7 +34,7 @@ public class BehaviorCampfireIgnite extends Bootstrap.BehaviorDispenseOptional
         final BlockPos pos = source.getBlockPos().offset(source.getBlockState().getValue(BlockDispenser.FACING));
         final IBlockState state = source.getWorld().getBlockState(pos);
 
-        if(state.getBlock() instanceof AbstractCampfire && ((AbstractCampfire<?>)state.getBlock()).igniteFire(source.getWorld(), pos, state)) {
+        if(state.getBlock() instanceof AbstractCampfire && ((AbstractCampfire)state.getBlock()).igniteFire(source.getWorld(), pos, state)) {
             successful = true;
             if(!state.getValue(AbstractCampfire.LIT)) {
                 if(stack.getMaxStackSize() == 1) {

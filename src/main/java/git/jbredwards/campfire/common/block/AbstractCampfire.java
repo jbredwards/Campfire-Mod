@@ -11,6 +11,7 @@ import git.jbredwards.campfire.common.compat.futuremc.IBeeCalmer;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.init.CampfireSounds;
 import git.jbredwards.campfire.common.item.ItemBlockColored;
+import git.jbredwards.campfire.common.message.MessageExtinguishEffects;
 import git.jbredwards.campfire.common.message.MessageFallParticles;
 import git.jbredwards.campfire.common.tileentity.AbstractCampfireTE;
 import git.jbredwards.fluidlogged_api.api.block.IFluidloggable;
@@ -44,6 +45,7 @@ import net.minecraft.item.ItemFlintAndSteel;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
@@ -83,7 +85,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("deprecation")
 @Mod.EventBusSubscriber(modid = "campfire")
 @Optional.Interface(modid = "fluidlogged_api", iface = "git.jbredwards.fluidlogged_api.api.block.IFluidloggable")
-public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Block implements ITileEntityProvider, IFluidloggable, IBeeCalmer
+public abstract class AbstractCampfire extends Block implements ITileEntityProvider, IFluidloggable, IBeeCalmer
 {
     @Nonnull
     public static final PropertyBool
@@ -127,13 +129,13 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
 
     @Nonnull
     @Override
-    public final T createNewTileEntity(@Nonnull World world, int meta) {
+    public final AbstractCampfireTE createNewTileEntity(@Nonnull World world, int meta) {
         return createTileEntity(world, getStateFromMeta(meta));
     }
 
     @Nonnull
     @Override
-    public abstract T createTileEntity(@Nonnull World world, @Nonnull IBlockState state);
+    public abstract AbstractCampfireTE createTileEntity(@Nonnull World world, @Nonnull IBlockState state);
 
     @Override
     public int getLightValue(@Nonnull IBlockState state) { return state.getValue(LIT) ? 15 : 0; }
@@ -262,7 +264,7 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
                     final BlockPos pos = result.getBlockPos();
                     final IBlockState state = entity.world.getBlockState(pos);
                     if(state.getBlock() instanceof AbstractCampfire && state.getValue(LIT))
-                        ((AbstractCampfire<?>)state.getBlock()).extinguishFire(entity.world, pos, state, true);
+                        ((AbstractCampfire)state.getBlock()).extinguishFire(entity.world, pos, state, true);
                 }
             }
             //snowballs extinguish fire
@@ -270,14 +272,14 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
                 final BlockPos pos = result.getBlockPos();
                 final IBlockState state = entity.world.getBlockState(pos);
                 if(state.getBlock() instanceof AbstractCampfire && state.getValue(LIT))
-                    ((AbstractCampfire<?>)state.getBlock()).extinguishFire(entity.world, pos, state, true);
+                    ((AbstractCampfire)state.getBlock()).extinguishFire(entity.world, pos, state, true);
             }
             //entities on fire ignite it
             else if(entity.isBurning()) {
                 final BlockPos pos = result.getBlockPos();
                 final IBlockState state = entity.world.getBlockState(pos);
                 if(state.getBlock() instanceof AbstractCampfire && !state.getValue(LIT))
-                    ((AbstractCampfire<?>)state.getBlock()).igniteFire(entity.world, pos, state);
+                    ((AbstractCampfire)state.getBlock()).igniteFire(entity.world, pos, state);
             }
         }
     }
@@ -322,33 +324,66 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
     }
 
     public void extinguishFire(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state, boolean playSound) {
+        extinguishFire(world, pos, state, state.withProperty(LIT, false), 0.4, playSound);
+    }
+
+    public void extinguishFire(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull IBlockState extinguishedState, double extraSmokeOffset, boolean playSound) {
         final @Nullable TileEntity tile = world.getTileEntity(pos);
         if(tile instanceof AbstractCampfireTE) {
-            if(world.isRemote) playExtinguishEffects(world, pos, (AbstractCampfireTE)tile, 0.4);
+            if(world.isRemote) playExtinguishEffects(world, pos, (AbstractCampfireTE)tile, extraSmokeOffset);
             if(CampfireConfigHandler.resetDyeOnExtinguish) ((AbstractCampfireTE)tile).color = -1;
         }
 
-        world.setBlockState(pos, state.withProperty(LIT, false));
+        world.setBlockState(pos, extinguishedState);
         if(playSound && !world.isRemote) world.playEvent(Constants.WorldEvents.FIRE_EXTINGUISH_SOUND, pos, 0);
     }
 
     public boolean igniteFire(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
         if(isNonFluidlogged(world, pos)) {
             world.setBlockState(pos, state.withProperty(LIT, true));
+            if(canBurnOut()) { //reset fire strength
+                final TileEntity tile = world.getTileEntity(pos);
+                if(tile instanceof AbstractCampfireTE) ((AbstractCampfireTE)tile).resetFireStrength();
+            }
+
             return true;
         }
 
         return false;
     }
 
-    public boolean canBurnOut() { return isSmokey && CampfireConfigHandler.canBurnOut; }
+    public abstract boolean canBurnOut();
     public boolean canRainExtinguish(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
-        return canBurnOut() && state.getValue(LIT) && world.getGameRules().getBoolean("doFireTick") && world.isRainingAt(pos.up());
+        return world.isRainingAt(pos.up());
+    }
+
+    public void burnOut(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
+        extinguishFire(world, pos, state, true);
     }
 
     @Override
     public void randomTick(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull Random random) {
-        if(canRainExtinguish(worldIn, pos, state) && random.nextFloat() < 0.25) extinguishFire(worldIn, pos, state, false);
+        if(canBurnOut() && state.getValue(LIT) && worldIn.getGameRules().getBoolean("doFireTick")) {
+            if(canRainExtinguish(worldIn, pos, state) && random.nextFloat() < 0.25) extinguishFire(worldIn, pos, state, false);
+            else if(random.nextFloat() < 0.25) {
+                final TileEntity tile = worldIn.getTileEntity(pos);
+                if(tile instanceof AbstractCampfireTE) {
+                    final AbstractCampfireTE campfire = (AbstractCampfireTE)tile;
+
+                    if(worldIn instanceof WorldServer) {
+                        final PlayerChunkMapEntry entry = ((WorldServer)worldIn).getPlayerChunkMap()
+                                .getEntry(pos.getX() >> 4, pos.getZ() >> 4);
+
+                        if(entry != null) {
+                            final MessageExtinguishEffects message = getBurnOutMessage(worldIn, pos, campfire);
+                            entry.getWatchingPlayers().forEach(player -> Campfire.WRAPPER.sendTo(message, player));
+                        }
+                    }
+
+                    if(--campfire.fireStrength == 0) burnOut(worldIn, pos, state);
+                }
+            }
+        }
     }
 
     //=========
@@ -442,6 +477,11 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
         }
     }
 
+    @Nonnull
+    protected MessageExtinguishEffects getBurnOutMessage(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull AbstractCampfireTE tile) {
+        return new MessageExtinguishEffects(pos, 0.4);
+    }
+
     @SideOnly(Side.CLIENT)
     public void playExtinguishEffects(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull AbstractCampfireTE tile, double extraSmokeOffset) {
         final int forcedSmokeColor = tile.forcedSmokeColor;
@@ -505,9 +545,8 @@ public abstract class AbstractCampfire<T extends AbstractCampfireTE> extends Blo
 
     @Override
     public boolean addLandingEffects(@Nonnull IBlockState state, @Nonnull WorldServer worldObj, @Nonnull BlockPos blockPosition, @Nonnull IBlockState iblockstate, @Nonnull EntityLivingBase entity, int amount) {
-        final ICampfireType type = ICampfireType.get(worldObj.getTileEntity(blockPosition));
-        if(type != null) {
-            Campfire.wrapper.sendToAllAround(
+        if(ICampfireType.get(worldObj.getTileEntity(blockPosition)) != null) {
+            Campfire.WRAPPER.sendToAllAround(
                     new MessageFallParticles(blockPosition, entity.posX, entity.posY, entity.posZ, amount),
                     new NetworkRegistry.TargetPoint(entity.dimension, entity.posX, entity.posY, entity.posZ, 32));
 

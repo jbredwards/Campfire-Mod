@@ -1,0 +1,29 @@
+{
+    "forge_marker":1,
+    "defaults":{
+        "model":"campfire:ash_layers/layer_1",
+        "textures":{
+            "ash":"campfire:blocks/campfire_ash",
+            "particle":"#ash"
+        }
+    },
+    "variants":{
+        "inventory":[{}],
+        "layers=1":[{}],
+        "layers=2":[{"model":"campfire:ash_layers/layer_2"}],
+        "layers=3":[{"model":"campfire:ash_layers/layer_3"}],
+        "layers=4":[{"model":"campfire:ash_layers/layer_4"}],
+        "layers=5":[{"model":"campfire:ash_layers/layer_5"}],
+        "layers=6":[{"model":"campfire:ash_layers/layer_6"}],
+        "layers=7":[{"model":"campfire:ash_layers/layer_7"}],
+        "layers=8":[{"model":"campfire:ash_layers/layer_8"}],
+        "layers=9":[{"model":"campfire:ash_layers/layer_9"}],
+        "layers=10":[{"model":"campfire:ash_layers/layer_10"}],
+        "layers=11":[{"model":"campfire:ash_layers/layer_11"}],
+        "layers=12":[{"model":"campfire:ash_layers/layer_12"}],
+        "layers=13":[{"model":"campfire:ash_layers/layer_13"}],
+        "layers=14":[{"model":"campfire:ash_layers/layer_14"}],
+        "layers=15":[{"model":"campfire:ash_layers/layer_15"}],
+        "layers=16":[{"model":"campfire:ash_layers/layer_16"}]
+    }
+}

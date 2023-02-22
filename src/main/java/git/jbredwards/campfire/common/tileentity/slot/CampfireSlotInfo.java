@@ -147,7 +147,7 @@ public class CampfireSlotInfo implements INBTSerializable<NBTTagCompound>
 
             if(entry != null) {
                 final MessageSyncCampfireSlot message = new MessageSyncCampfireSlot(this);
-                entry.getWatchingPlayers().forEach(player -> Campfire.wrapper.sendTo(message, player));
+                entry.getWatchingPlayers().forEach(player -> Campfire.WRAPPER.sendTo(message, player));
             }
         }
     }

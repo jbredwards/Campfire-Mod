@@ -64,12 +64,15 @@ public final class CampfireJEIPlugin implements IModPlugin
                         }
 
                         final Ingredient input = Ingredient.fromStacks(stacks);
-                        instances.remove(input); //prevents memory leak
+                        instances.remove(input); //prevent memory leak
                         return input;
                     }
                 ).collect(Collectors.toList())));
             }
         }, VanillaRecipeCategoryUid.CRAFTING);
+
+        //add description of how to obtain campfire ash
+        registry.addIngredientInfo(new ItemStack(CampfireItems.CAMPFIRE_ASH), VanillaTypes.ITEM, "gui.campfire.jei.info.campfire_ash");
     }
 
     @Override

@@ -5,8 +5,10 @@ import git.jbredwards.campfire.common.block.state.ColorProperty;
 import git.jbredwards.campfire.common.block.state.ItemStackProperty;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
+import git.jbredwards.campfire.common.init.CampfireBlocks;
 import git.jbredwards.campfire.common.item.ItemBlockColored;
 import git.jbredwards.campfire.common.item.ItemCampfire;
+import git.jbredwards.campfire.common.message.MessageExtinguishEffects;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipe;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipeHandler;
 import git.jbredwards.campfire.common.tileentity.AbstractCampfireTE;
@@ -55,7 +57,7 @@ import java.util.Random;
  *
  */
 @SuppressWarnings("deprecation")
-public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
+public class BlockCampfire extends AbstractCampfire
 {
     @Nonnull public static final PropertyBool X_AXIS = PropertyBool.create("x_axis");
     @Nonnull public static final AxisAlignedBB AABB = box(0, 0, 0, 16, 7, 16);
@@ -120,6 +122,14 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
         return new TileEntityCampfire();
     }
 
+    @Nonnull
+    @Override
+    public EnumPushReaction getPushReaction(@Nonnull IBlockState state) { return EnumPushReaction.DESTROY; }
+
+    //===========
+    //HANDLE FIRE
+    //===========
+
     @Override
     public boolean onBlockActivated(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull EntityPlayer playerIn, @Nonnull EnumHand hand, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ) {
         if(isNonFluidlogged(worldIn, pos)) {
@@ -137,6 +147,20 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
     @Override
     public boolean isBurning(@Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
         return CampfireConfigHandler.isCampfireBurningBlock && world.getBlockState(pos).getValue(LIT);
+    }
+
+    @Override
+    public boolean canBurnOut() { return isSmokey && CampfireConfigHandler.campfireBurnOut > 0; }
+
+    @Override
+    public void burnOut(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
+        extinguishFire(world, pos, state, CampfireBlocks.CAMPFIRE_ASH.getDefaultState(), 0.125, true);
+    }
+
+    @Nonnull
+    @Override
+    protected MessageExtinguishEffects getBurnOutMessage(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull AbstractCampfireTE tile) {
+        return new MessageExtinguishEffects(pos, tile.fireStrength == 1 ? 0.125 : 0.4);
     }
 
     //============
@@ -182,10 +206,6 @@ public class BlockCampfire extends AbstractCampfire<TileEntityCampfire>
 
         super.breakBlock(worldIn, pos, state);
     }
-
-    @Nonnull
-    @Override
-    public EnumPushReaction getPushReaction(@Nonnull IBlockState state) { return EnumPushReaction.DESTROY; }
 
     @SuppressWarnings("ConstantConditions")
     @Override

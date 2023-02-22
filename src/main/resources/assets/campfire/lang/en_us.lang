@@ -1,6 +1,7 @@
 //blocks
 tile.campfire.brazier.name=Brazier
 tile.campfire.campfire.name=Campfire
+tile.campfire.campfire_ash.name=Ash
 //regex
 regex.campfire.target=$
 regex.campfire.replacement= Campfire
@@ -12,6 +13,7 @@ tooltip.campfire.futuremc.deprecated=This item is deprecated!
 gui.campfire.jei.category.campfire=Campfire
 gui.campfire.jei.category.campfire.cookTime=%s s
 gui.campfire.jei.category.campfire.experience=%s XP
+gui.campfire.jei.info.campfire_ash=Whenever a campfire completely burns out and destroys its logs, it leaves this behind.
 //config
 config.campfire.brazierEmitsSmoke=Braziers Emit Smoke
 config.campfire.brazierEmitsSmoke.tooltip=While enabled, braziers emit smoke particles.

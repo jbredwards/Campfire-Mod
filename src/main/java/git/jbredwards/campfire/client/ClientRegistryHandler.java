@@ -61,6 +61,8 @@ final class ClientRegistryHandler
 
         ModelLoader.setCustomModelResourceLocation(CampfireItems.CAMPFIRE, 0, new ModelResourceLocation("campfire:campfire", "inventory"));
         ModelLoader.setCustomModelResourceLocation(CampfireItems.CAMPFIRE, 1, new ModelResourceLocation("campfire:campfire", "inventory_unlit"));
+
+        ModelLoader.setCustomModelResourceLocation(CampfireItems.CAMPFIRE_ASH, 0, new ModelResourceLocation("campfire:campfire_ash", "inventory"));
     }
 
     @SubscribeEvent

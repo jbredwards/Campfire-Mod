@@ -29,7 +29,7 @@ import java.util.List;
  * @author jbred
  *
  */
-public class BlockBrazier extends AbstractCampfire<TileEntityBrazier>
+public class BlockBrazier extends AbstractCampfire
 {
     @Nonnull public static final AxisAlignedBB AABB = box(0, 0, 0, 16, 14, 16);
     @Nonnull public static final List<AxisAlignedBB> BOUNDING_BOXES = ImmutableList.of(
@@ -94,4 +94,7 @@ public class BlockBrazier extends AbstractCampfire<TileEntityBrazier>
     public boolean isBurning(@Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
         return CampfireConfigHandler.isBrazierBurningBlock && world.getBlockState(pos).getValue(LIT);
     }
+
+    @Override
+    public boolean canBurnOut() { return isSmokey && CampfireConfigHandler.brazierBurnOut > 0; }
 }

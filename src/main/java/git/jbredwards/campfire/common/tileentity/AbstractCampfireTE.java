@@ -27,6 +27,11 @@ public abstract class AbstractCampfireTE extends TileEntity implements ITickable
 {
     public int color = -1;
     public int forcedSmokeColor = -1;
+    //randomly ticks down over time (if enabled), when this reaches 0 the fire will burn out.
+    //the logic for this is handled in the AbstractCampfire block class
+    public int fireStrength;
+    public AbstractCampfireTE() { resetFireStrength(); }
+    public abstract void resetFireStrength();
 
     public boolean isLit() { return (getBlockMetadata() & 2) != 0; }
     public boolean isSignal() { return (getBlockMetadata() & 4) != 0; }
@@ -37,17 +42,16 @@ public abstract class AbstractCampfireTE extends TileEntity implements ITickable
     }
 
     @Nonnull
-    public Optional<AbstractCampfire<?>> getBlock() {
-        return getBlockType() instanceof AbstractCampfire ? Optional.of((AbstractCampfire<?>)getBlockType()) : Optional.empty();
+    public Optional<AbstractCampfire> getBlock() {
+        return getBlockType() instanceof AbstractCampfire ? Optional.of((AbstractCampfire)getBlockType()) : Optional.empty();
     }
 
     @SideOnly(Side.CLIENT)
     public void addParticles() {
-        final Optional<AbstractCampfire<?>> block = getBlock();
+        final Optional<AbstractCampfire> block = getBlock();
         if(block.isPresent() && block.get().isSmokey() && world.rand.nextFloat() < 0.11) {
             final int smokeColor = getSmokeColor();
             final int fallbackColor = getFallbackColor();
-
             for(int i = 0; i < world.rand.nextInt(2) + 2; i++)
                 block.get().addParticles(world, pos, smokeColor, fallbackColor, forcedSmokeColor != -1, isSignal(), isPowered(), -1);
         }
@@ -78,14 +82,17 @@ public abstract class AbstractCampfireTE extends TileEntity implements ITickable
         super.writeToNBT(compound);
         if(color != -1) compound.setInteger("Color", color);
         if(forcedSmokeColor != -1) compound.setInteger("ForcedSmokeColor", forcedSmokeColor);
+
+        compound.setInteger("FireStrength", fireStrength);
         return compound;
     }
 
     @Override
     public void readFromNBT(@Nonnull NBTTagCompound compound) {
         super.readFromNBT(compound);
-        color = compound.hasKey("Color", Constants.NBT.TAG_INT) ? compound.getInteger("Color") : -1;
-        forcedSmokeColor = compound.hasKey("ForcedSmokeColor", Constants.NBT.TAG_INT) ? compound.getInteger("ForcedSmokeColor") : -1;
+        if(compound.hasKey("Color", Constants.NBT.TAG_INT)) color = compound.getInteger("Color");
+        if(compound.hasKey("ForcedSmokeColor", Constants.NBT.TAG_INT)) forcedSmokeColor = compound.getInteger("ForcedSmokeColor");
+        if(compound.hasKey("FireStrength", Constants.NBT.TAG_INT)) fireStrength = compound.getInteger("FireStrength");
     }
 
     @Override

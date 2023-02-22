@@ -24,6 +24,8 @@ public class TileEntityCampfire extends AbstractCampfireTE
     public final List<CampfireSlotInfo> slotInfo = new ArrayList<>();
     public TileEntityCampfire() { initSlots(); }
 
+    @Override
+    public void resetFireStrength() { fireStrength = CampfireConfigHandler.campfireBurnOut; }
     protected void initSlots() {
         slotInfo.add(new CampfireSlotInfo(this, 0).setOffset(-0.3125, -0.05078125, -0.3125).setItemRotation(0));
         slotInfo.add(new CampfireSlotInfo(this, 1).setOffset(-0.3125, -0.05078125, 0.3125).setItemRotation(90));

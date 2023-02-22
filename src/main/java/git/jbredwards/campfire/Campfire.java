@@ -4,6 +4,7 @@ import git.jbredwards.campfire.client.renderer.tileentity.CampfireTESR;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.dispenser.BehaviorCampfireIgnite;
+import git.jbredwards.campfire.common.message.MessageExtinguishEffects;
 import git.jbredwards.campfire.common.message.MessageFallParticles;
 import git.jbredwards.campfire.common.message.MessageSyncCampfireSlot;
 import git.jbredwards.campfire.common.tileentity.TileEntityCampfire;
@@ -33,13 +34,14 @@ public final class Campfire
     public static final boolean isFluidloggedAPI = Loader.isModLoaded("fluidlogged_api");
 
     @SuppressWarnings("NotNullFieldNotInitialized")
-    @Nonnull public static SimpleNetworkWrapper wrapper;
+    @Nonnull public static SimpleNetworkWrapper WRAPPER;
 
     @Mod.EventHandler
     static void preInit(@Nonnull FMLPreInitializationEvent event) {
-        wrapper = NetworkRegistry.INSTANCE.newSimpleChannel("campfire");
-        wrapper.registerMessage(MessageFallParticles.Handler.INSTANCE, MessageFallParticles.class, 0, Side.CLIENT);
-        wrapper.registerMessage(MessageSyncCampfireSlot.Handler.INSTANCE, MessageSyncCampfireSlot.class, 1, Side.CLIENT);
+        WRAPPER = NetworkRegistry.INSTANCE.newSimpleChannel("campfire");
+        WRAPPER.registerMessage(MessageFallParticles.Handler.INSTANCE, MessageFallParticles.class, 0, Side.CLIENT);
+        WRAPPER.registerMessage(MessageSyncCampfireSlot.Handler.INSTANCE, MessageSyncCampfireSlot.class, 1, Side.CLIENT);
+        WRAPPER.registerMessage(MessageExtinguishEffects.Handler.INSTANCE, MessageExtinguishEffects.class, 2, Side.CLIENT);
         CapabilityManager.INSTANCE.register(ICampfireType.class, ICampfireType.Storage.INSTANCE, ICampfireType.Impl::new);
     }
 
