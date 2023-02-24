@@ -101,7 +101,6 @@ public abstract class AbstractCampfire extends Block implements ITileEntityProvi
     public AbstractCampfire(@Nonnull Material materialIn, @Nonnull MapColor mapColorIn, boolean isSmokeyIn) {
         super(materialIn, mapColorIn);
         isSmokey = isSmokeyIn;
-        setTickRandomly(true);
         setDefaultState(getDefaultState().withProperty(POWERED, false).withProperty(SIGNAL, false));
     }
 
@@ -362,25 +361,32 @@ public abstract class AbstractCampfire extends Block implements ITileEntityProvi
     }
 
     @Override
+    public boolean getTickRandomly() { return canBurnOut(); }
+
+    @Override
     public void randomTick(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull Random random) {
-        if(canBurnOut() && state.getValue(LIT) && worldIn.getGameRules().getBoolean("doFireTick")) {
+        if(getTickRandomly() && state.getValue(LIT) && worldIn.getGameRules().getBoolean("doFireTick")) {
             if(canRainExtinguish(worldIn, pos, state) && random.nextFloat() < 0.25) extinguishFire(worldIn, pos, state, false);
             else if(random.nextFloat() < 0.25) {
                 final TileEntity tile = worldIn.getTileEntity(pos);
                 if(tile instanceof AbstractCampfireTE) {
                     final AbstractCampfireTE campfire = (AbstractCampfireTE)tile;
+                    if(campfire.fireStrength > 0) {
+                        //send client-side burn out particles
+                        if(worldIn instanceof WorldServer) {
+                            final PlayerChunkMapEntry entry = ((WorldServer)worldIn).getPlayerChunkMap()
+                                    .getEntry(pos.getX() >> 4, pos.getZ() >> 4);
 
-                    if(worldIn instanceof WorldServer) {
-                        final PlayerChunkMapEntry entry = ((WorldServer)worldIn).getPlayerChunkMap()
-                                .getEntry(pos.getX() >> 4, pos.getZ() >> 4);
-
-                        if(entry != null) {
-                            final MessageExtinguishEffects message = getBurnOutMessage(worldIn, pos, campfire);
-                            entry.getWatchingPlayers().forEach(player -> Campfire.WRAPPER.sendTo(message, player));
+                            if(entry != null) {
+                                final MessageExtinguishEffects message = getBurnOutMessage(worldIn, pos, campfire);
+                                entry.getWatchingPlayers().forEach(player -> Campfire.WRAPPER.sendTo(message, player));
+                            }
                         }
-                    }
 
-                    if(--campfire.fireStrength == 0) burnOut(worldIn, pos, state);
+                        //handle campfire burn out
+                        worldIn.updateObservingBlocksAt(pos, this);
+                        if(--campfire.fireStrength == 0) burnOut(worldIn, pos, state);
+                    }
                 }
             }
         }
