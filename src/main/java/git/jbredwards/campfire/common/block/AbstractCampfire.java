@@ -96,12 +96,12 @@ public abstract class AbstractCampfire extends Block implements ITileEntityProvi
     protected final boolean isSmokey;
     public AbstractCampfire(@Nonnull Material materialIn, boolean isSmokeyIn) {
         this(materialIn, materialIn.getMaterialMapColor(), isSmokeyIn);
-        setTickRandomly(true);
     }
 
     public AbstractCampfire(@Nonnull Material materialIn, @Nonnull MapColor mapColorIn, boolean isSmokeyIn) {
         super(materialIn, mapColorIn);
         isSmokey = isSmokeyIn;
+        setTickRandomly(true);
         setDefaultState(getDefaultState().withProperty(POWERED, false).withProperty(SIGNAL, false));
     }
 

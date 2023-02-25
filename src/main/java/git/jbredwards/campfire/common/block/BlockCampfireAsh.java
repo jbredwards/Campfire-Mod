@@ -1,5 +1,6 @@
 package git.jbredwards.campfire.common.block;
 
+import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.fluidlogged_api.api.block.IFluidloggable;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.SoundType;
@@ -168,7 +169,7 @@ public class BlockCampfireAsh extends BlockFalling implements IFluidloggable
     @Override
     public void randomDisplayTick(@Nonnull IBlockState stateIn, @Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull Random rand) {
         super.randomDisplayTick(stateIn, worldIn, pos, rand);
-        if(rand.nextFloat() < 0.25) {
+        if(CampfireConfigHandler.campfireAshEmitsParticles && rand.nextFloat() < 0.25) {
             final double yOffset = stateIn.getValue(LAYERS) * 0.0625 + 0.0625;
             for(EnumFacing side : EnumFacing.values()) {
                 if(stateIn.shouldSideBeRendered(worldIn, pos, side) && (side.getAxis().isVertical() || rand.nextFloat() < yOffset)) {

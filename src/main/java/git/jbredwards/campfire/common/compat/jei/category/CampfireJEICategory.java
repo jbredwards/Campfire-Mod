@@ -104,6 +104,5 @@ public class CampfireJEICategory extends FurnaceRecipeCategory<CampfireJEIRecipe
 
         guiItemStacks.init(fuelSlot, false, 0, 36);
         guiItemStacks.set(fuelSlot, campfires);
-        recipeLayout.setShapeless();
     }
 }
