@@ -15,8 +15,12 @@ gui.campfire.jei.category.campfire.cookTime=%s s
 gui.campfire.jei.category.campfire.experience=%s XP
 gui.campfire.jei.info.campfire_ash=Whenever a campfire completely burns out and destroys its logs, it leaves this behind.
 //config
+config.campfire.brazierBurnOut=Brazier Fire Strength
+config.campfire.brazierBurnOut.tooltip=The initial fire strength of a brazier. Each random block tick, the fire strength will tick down, once it reaches 0 the fire will be extinguished. Set the config to 0 to ignore this behavior (vanilla).
 config.campfire.brazierEmitsSmoke=Braziers Emit Smoke
 config.campfire.brazierEmitsSmoke.tooltip=While enabled, braziers emit smoke particles.
+config.campfire.campfireBurnOut=Campfire Fire Strength
+config.campfire.campfireBurnOut.tooltip=The initial fire strength of a campfire. Each random block tick, the fire strength will tick down, once it reaches 0 the fire (and logs) will be extinguished, leaving behind an ash pile. Set the config to 0 to ignore this behavior (vanilla).
 config.campfire.campfireEmitsSmoke=Campfires Emit Smoke
 config.campfire.campfireEmitsSmoke.tooltip=While enabled, campfires emit smoke particles.
 config.campfire.doesSmokeFollowDye=Smoke Follows Dye
@@ -29,3 +33,7 @@ config.campfire.isCampfireBurningBlock=Campfires Burn Entities
 config.campfire.isCampfireBurningBlock.tooltip=While enabled, campfires burn entities.
 config.campfire.poweredAction=Redstone Powered Action
 config.campfire.poweredAction.tooltip=Controls what this does while powered: (IGNORE = emited smoke is the default color; COLOR = emited smoke is the same color as the block below (map color); DISABLE = no smoke is emited)
+config.campfire.resetDyeOnExtinguish=Extinguish Resets Color
+config.campfire.resetDyeOnExtinguish.tooltip=While enabled, igniting a previously extinguished brazier or campfire will reset its previous fire color back to the default one.
+config.campfire.unlitOnCraft=Unlit On Craft
+config.campfire.unlitOnCraft.tooltip=When a brazier or campfire is initially crafted, it will be extinguished.

@@ -96,6 +96,7 @@ public abstract class AbstractCampfire extends Block implements ITileEntityProvi
     protected final boolean isSmokey;
     public AbstractCampfire(@Nonnull Material materialIn, boolean isSmokeyIn) {
         this(materialIn, materialIn.getMaterialMapColor(), isSmokeyIn);
+        setTickRandomly(true);
     }
 
     public AbstractCampfire(@Nonnull Material materialIn, @Nonnull MapColor mapColorIn, boolean isSmokeyIn) {
@@ -361,11 +362,8 @@ public abstract class AbstractCampfire extends Block implements ITileEntityProvi
     }
 
     @Override
-    public boolean getTickRandomly() { return canBurnOut(); }
-
-    @Override
     public void randomTick(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull Random random) {
-        if(getTickRandomly() && state.getValue(LIT) && worldIn.getGameRules().getBoolean("doFireTick")) {
+        if(canBurnOut() && state.getValue(LIT) && worldIn.getGameRules().getBoolean("doFireTick")) {
             if(canRainExtinguish(worldIn, pos, state) && random.nextFloat() < 0.25) extinguishFire(worldIn, pos, state, false);
             else if(random.nextFloat() < 0.25) {
                 final TileEntity tile = worldIn.getTileEntity(pos);
