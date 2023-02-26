@@ -357,15 +357,19 @@ public abstract class AbstractCampfire extends Block implements ITileEntityProvi
         return world.isRainingAt(pos.up());
     }
 
+    public boolean isFireSourceBelow(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState campfire) {
+        return world.getBlockState(pos.down()).getBlock().isFireSource(world, pos.down(), EnumFacing.UP);
+    }
+
     public void burnOut(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
         extinguishFire(world, pos, state, true);
     }
 
     @Override
     public void randomTick(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nonnull Random random) {
-        if(canBurnOut() && state.getValue(LIT) && worldIn.getGameRules().getBoolean("doFireTick")) {
+        if(canBurnOut() && state.getValue(LIT) && worldIn.getGameRules().getBoolean("doFireTick") && !isFireSourceBelow(worldIn, pos, state)) {
             if(canRainExtinguish(worldIn, pos, state) && random.nextFloat() < 0.25) extinguishFire(worldIn, pos, state, false);
-            else if(random.nextFloat() < 0.25) {
+            else {
                 final TileEntity tile = worldIn.getTileEntity(pos);
                 if(tile instanceof AbstractCampfireTE) {
                     final AbstractCampfireTE campfire = (AbstractCampfireTE)tile;

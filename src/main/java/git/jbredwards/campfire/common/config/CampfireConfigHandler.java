@@ -65,11 +65,11 @@ public final class CampfireConfigHandler
     @Config.LangKey("config.campfire.unlitOnCraft")
     public static boolean unlitOnCraft = false;
 
-    @Config.RangeInt(min = 0, max = 200)
+    @Config.RangeInt(min = 0)
     @Config.LangKey("config.campfire.brazierBurnOut")
     public static int brazierBurnOut = 0;
 
-    @Config.RangeInt(min = 0, max = 200)
+    @Config.RangeInt(min = 0)
     @Config.LangKey("config.campfire.campfireBurnOut")
     public static int campfireBurnOut = 0;
 
@@ -181,19 +181,15 @@ public final class CampfireConfigHandler
             //only one recipe to remove
             if(removeElement.isJsonObject()) {
                 final JsonObject remove = removeElement.getAsJsonObject();
-                if(remove.has("input")) removeInput.accept(
-                        ItemStackDeserializer.INSTANCE.deserialize(remove.get("input"), null, null));
-                else if(remove.has("output")) removeOutput.accept(
-                        ItemStackDeserializer.INSTANCE.deserialize(remove.get("output"), null, null));
+                if(remove.has("input")) removeInput.accept(ItemStackDeserializer.INSTANCE.deserialize(remove.get("input"), null, null));
+                else if(remove.has("output")) removeOutput.accept(ItemStackDeserializer.INSTANCE.deserialize(remove.get("output"), null, null));
             }
             //multiple recipes to remove
             else removeElement.getAsJsonArray().forEach(element -> {
                 if(element.isJsonObject()) {
                     final JsonObject remove = element.getAsJsonObject();
-                    if(remove.has("input")) removeInput.accept(
-                            ItemStackDeserializer.INSTANCE.deserialize(remove.get("input"), null, null));
-                    else if(remove.has("output")) removeOutput.accept(
-                            ItemStackDeserializer.INSTANCE.deserialize(remove.get("output"), null, null));
+                    if(remove.has("input")) removeInput.accept(ItemStackDeserializer.INSTANCE.deserialize(remove.get("input"), null, null));
+                    else if(remove.has("output")) removeOutput.accept(ItemStackDeserializer.INSTANCE.deserialize(remove.get("output"), null, null));
                 }
             });
         }
