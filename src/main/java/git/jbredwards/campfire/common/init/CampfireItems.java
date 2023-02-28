@@ -2,7 +2,7 @@ package git.jbredwards.campfire.common.init;
 
 import git.jbredwards.campfire.common.item.ItemBlockColored;
 import git.jbredwards.campfire.common.item.ItemCampfire;
-import git.jbredwards.campfire.common.item.ItemCampfireAsh;
+import net.minecraft.item.ItemBlock;
 
 import javax.annotation.Nonnull;
 
@@ -20,5 +20,5 @@ public final class CampfireItems
     public static final ItemCampfire CAMPFIRE = new ItemCampfire(CampfireBlocks.CAMPFIRE);
 
     @Nonnull
-    public static final ItemCampfireAsh CAMPFIRE_ASH = new ItemCampfireAsh(CampfireBlocks.CAMPFIRE_ASH);
+    public static final ItemBlock CAMPFIRE_ASH = new ItemBlock(CampfireBlocks.CAMPFIRE_ASH);
 }

@@ -1,6 +1,7 @@
 package git.jbredwards.campfire.asm;
 
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -26,20 +27,21 @@ public final class ASMHandler implements IFMLLoadingPlugin
      * to be the same class as {@link IFMLLoadingPlugin IFMLLoadingPlugins}
      */
     @SuppressWarnings("unused")
-    public static final class Transformer implements IClassTransformer
+    public static final class Transformer implements IClassTransformer, Opcodes
     {
         @Nonnull
         @Override
         public byte[] transform(@Nonnull String name, @Nonnull String transformedName, @Nonnull byte[] basicClass) {
-            //compat with future mc mod beehives
-            if("thedarkcolour.futuremc.block.villagepillage.CampfireBlock$Companion".equals(transformedName)) {
+            final boolean isFutureMC = "thedarkcolour.futuremc.block.villagepillage.CampfireBlock$Companion".equals(transformedName);
+            if(isFutureMC || "thaumcraft.common.tiles.crafting.TileCrucible".equals(transformedName)) {
                 final ClassNode classNode = new ClassNode();
                 new ClassReader(basicClass).accept(classNode, 0);
 
-                classNode.interfaces.add("git/jbredwards/campfire/common/compat/futuremc/IBeeCalmer");
+                if(isFutureMC) classNode.interfaces.add("git/jbredwards/campfire/common/compat/futuremc/IBeeCalmer");
                 all: //find the desired method
                 for(MethodNode method : classNode.methods) {
-                    if(method.name.equals("isLitCampfire")) {
+                    //compat with future mc mod beehives
+                    if(isFutureMC) { if(method.name.equals("isLitCampfire")) {
                         for(AbstractInsnNode insn : method.instructions.toArray()) {
                             /*
                              * Old code:
@@ -47,10 +49,56 @@ public final class ASMHandler implements IFMLLoadingPlugin
                              *
                              * New code:
                              * //check for interface instead of class
-                             * return state.getBlock() instanceof IBeeCalmer && state.getValue(LIT);
+                             * return state.getBlock() instanceof IBeeCalmer && ((IBeeCalmer)state.getBlock()).canCalmBeeHive(state);
                              */
-                            if(insn.getOpcode() == Opcodes.LDC) {
-                                ((LdcInsnNode)insn).cst = "git/jbredwards/campfire/common/compat/futuremc/IBeeCalmer";
+                            if(insn.getOpcode() == INSTANCEOF) ((TypeInsnNode)insn).desc = "git/jbredwards/campfire/common/compat/futuremc/IBeeCalmer";
+                            else if(insn.getOpcode() == INVOKEINTERFACE && ((MethodInsnNode)insn).name.equals("booleanValue")) {
+                                final InsnList list = new InsnList();
+                                list.add(new VarInsnNode(ALOAD, 1));
+                                list.add(new MethodInsnNode(INVOKEINTERFACE, "net/minecraft/block/state/IBlockState", FMLLaunchHandler.isDeobfuscatedEnvironment() ? "getBlock" : "func_177230_c", "()Lnet/minecraft/block/Block;", true));
+                                list.add(new TypeInsnNode(CHECKCAST, "git/jbredwards/campfire/common/compat/futuremc/IBeeCalmer"));
+                                list.add(new VarInsnNode(ALOAD, 1));
+                                list.add(new MethodInsnNode(INVOKEINTERFACE, "git/jbredwards/campfire/common/compat/futuremc/IBeeCalmer", "canCalmBeeHive", "(Lnet/minecraft/block/state/IBlockState)Z", true));
+
+                                method.instructions.insert(insn, list);
+                                for(int i = 0; i < 10; i++) method.instructions.remove(insn.getPrevious());
+                                method.instructions.remove(insn);
+                                break all;
+                            }
+                        }
+                    }}
+                    //compat with thaumcraft mod crucible
+                    else if(method.name.equals(FMLLaunchHandler.isDeobfuscatedEnvironment() ? "update" : "func_73660_a")) {
+                        for(AbstractInsnNode insn : method.instructions.toArray()) {
+                            /*
+                             * Old code:
+                             * if (block.getMaterial() == Material.LAVA
+                             * || block.getMaterial() == Material.FIRE
+                             * || BlocksTC.nitor.containsValue(block.getBlock())
+                             * || block.getBlock() == Blocks.MAGMA)
+                             * {
+                             *     ...
+                             * }
+                             *
+                             * New code:
+                             * //add check for campfires
+                             * if (block.getMaterial() == Material.LAVA
+                             * || block.getMaterial() == Material.FIRE
+                             * || BlocksTC.nitor.containsValue(block.getBlock())
+                             * || block.getBlock() instanceof AbstractCampfire
+                             * || block.getBlock() == Blocks.MAGMA)
+                             * {
+                             *     ...
+                             * }
+                             */
+                            if(insn.getOpcode() == INVOKEVIRTUAL && ((MethodInsnNode)insn).name.equals("containsValue")) {
+                                final InsnList list = new InsnList();
+                                list.add(new VarInsnNode(ALOAD, 2));
+                                list.add(new MethodInsnNode(INVOKEINTERFACE, "net/minecraft/block/state/IBlockState", FMLLaunchHandler.isDeobfuscatedEnvironment() ? "getBlock" : "func_177230_c", "()Lnet/minecraft/block/Block;", true));
+                                list.add(new TypeInsnNode(INSTANCEOF, "git/jbredwards/campfire/common/block/AbstractCampfire"));
+                                list.add(new JumpInsnNode(IFNE, ((JumpInsnNode)insn.getNext()).label));
+
+                                method.instructions.insert(insn.getNext(), list);
                                 break all;
                             }
                         }

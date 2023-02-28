@@ -674,4 +674,13 @@ public abstract class AbstractCampfire extends Block implements ITileEntityProvi
     protected boolean isNonFluidlogged(@Nonnull World world, @Nonnull BlockPos pos) {
         return !Campfire.isFluidloggedAPI || !FluidloggedAPI.isFluidlogged(world, pos);
     }
+
+    //================
+    //FUTURE MC COMPAT
+    //================
+
+    @Override
+    public boolean canCalmBeeHive(@Nonnull IBlockState campfire) {
+        return isSmokey() && campfire.getValue(LIT) && !(campfire.getValue(POWERED) && CampfireConfigHandler.poweredAction == CampfireConfigHandler.PoweredAction.DISABLE);
+    }
 }

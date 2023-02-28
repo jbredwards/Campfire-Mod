@@ -2,6 +2,7 @@ package git.jbredwards.campfire;
 
 import git.jbredwards.campfire.client.renderer.tileentity.CampfireTESR;
 import git.jbredwards.campfire.common.capability.ICampfireType;
+import git.jbredwards.campfire.common.compat.ex_nihilo.ExNihiloHandler;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.dispenser.BehaviorCampfireIgnite;
 import git.jbredwards.campfire.common.message.MessageExtinguishEffects;
@@ -14,6 +15,7 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -28,7 +30,7 @@ import javax.annotation.Nonnull;
  * @author jbred
  *
  */
-@Mod(modid = "campfire", name = "Campfire", version = "1.1.0")
+@Mod(modid = "campfire", name = "Campfire", version = "1.1.1")
 public final class Campfire
 {
     public static final boolean isFluidloggedAPI = Loader.isModLoaded("fluidlogged_api");
@@ -49,6 +51,11 @@ public final class Campfire
     @Mod.EventHandler
     static void preInitClient(@Nonnull FMLPreInitializationEvent event) {
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityCampfire.class, new CampfireTESR());
+    }
+
+    @Mod.EventHandler
+    static void init(@Nonnull FMLInitializationEvent event) throws IllegalAccessException {
+        if(Loader.isModLoaded("exnihilocreatio")) ExNihiloHandler.handleHeatSources();
     }
 
     @Mod.EventHandler
