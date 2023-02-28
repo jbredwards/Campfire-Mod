@@ -1,0 +1,41 @@
+//blocks
+tile.campfire.brazier.name=Brasero
+tile.campfire.campfire.name=Fogata
+tile.campfire.campfire_ash.name=Ceniza
+//regex
+regex.campfire.target=$
+regex.campfire.replacement= Fogata
+//subtitles
+subtitles.campfire.crackle=Fogata crepita
+//futuremc
+tooltip.campfire.futuremc.deprecated=Este ítem está obsoleto!
+//jei
+gui.campfire.jei.category.campfire=Fogata
+gui.campfire.jei.category.campfire.cookTime=%s s
+gui.campfire.jei.category.campfire.experience=%s XP
+gui.campfire.jei.info.campfire_ash=Cuando una fogata consume toda la leña, deja esto.
+//config
+config.campfire.brazierBurnOut=Potencia del fuego de brasero
+config.campfire.brazierBurnOut.tooltip=La potencia inicial del fuego de un brasero. Cada tick aleatorio, la potencia del fuego disminuirá, una vez alcance 0, el fuego se extinguirá. Dejar este valor en 0 desabilita esta función (vanilla).
+config.campfire.brazierEmitsSmoke=Los braseros emite humo
+config.campfire.brazierEmitsSmoke.tooltip=Si el brasero debiera emitir partículas de humo.
+config.campfire.campfireBurnOut=Potencia del fuego de fogata
+config.campfire.campfireBurnOut.tooltip=La potencia inicial del fuego de una fogata. Cada tick aleatorio, la potencia del fuego disminuirá, una vez alcance 0, el fuego (y los troncos) se extinguirá y dejará ceniza. Dejar este valor en 0 desabilita esta función (vanilla).
+config.campfire.campfireAshEmitsParticles=Las cenizas de fogata emiten humo
+config.campfire.campfireAshEmitsParticles.tooltip=Si las cenizas dejadas por unafogata debieran emitir partículas (las cenizas de fogata se pueden crear al dejar que una se extinga por completo, si esa opción está habilitada en esta configuración).
+config.campfire.campfireEmitsSmoke=Las fogatas emiten humo
+config.campfire.campfireEmitsSmoke.tooltip=Si la fogata debiera emitir partículas de humo.
+config.campfire.doesSmokeFollowDye=El humo es afectado por tintes
+config.campfire.doesSmokeFollowDye.tooltip=Si el humo debiera adoptar el mismo color de tinte utilizado en el brasero o fogata.
+config.campfire.hasExtraSlots=Las fogatas tienen más espacios
+config.campfire.hasExtraSlots.tooltip=Las fogatas tienen 8 espacios interactuables en vez de los 4 en vanilla.
+config.campfire.isBrazierBurningBlock=Los braseros queman entidades
+config.campfire.isBrazierBurningBlock.tooltip=Si un brasero debiera quemar entidades que lo toquen.
+config.campfire.isCampfireBurningBlock=Las fogatas queman entidades
+config.campfire.isCampfireBurningBlock.tooltip=Si una fogata debiera quemar entidades que la toquen.
+config.campfire.poweredAction=Controlado por redstone
+config.campfire.poweredAction.tooltip=Controla la interacción con una señal de redstone: (IGNORE = las partículas mantienen su color por defecto; COLOR = las partículas cambian su color al del bloque debajo; DISABLE = no se emiten partículas).
+config.campfire.resetDyeOnExtinguish=Extinguir reestablece el color
+config.campfire.resetDyeOnExtinguish.tooltip=Reavivar un brasero o una fogata extinguida reestablecerá su color por defecto. 
+config.campfire.unlitOnCraft=Apagado al crear
+config.campfire.unlitOnCraft.tooltip=Al crear un brasero o una fogata nueva, estará apagada.
