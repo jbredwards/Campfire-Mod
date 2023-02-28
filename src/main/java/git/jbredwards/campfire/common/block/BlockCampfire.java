@@ -6,7 +6,6 @@ import git.jbredwards.campfire.common.block.state.ItemStackProperty;
 import git.jbredwards.campfire.common.capability.ICampfireType;
 import git.jbredwards.campfire.common.config.CampfireConfigHandler;
 import git.jbredwards.campfire.common.init.CampfireBlocks;
-import git.jbredwards.campfire.common.item.ItemBlockColored;
 import git.jbredwards.campfire.common.item.ItemCampfire;
 import git.jbredwards.campfire.common.message.MessageExtinguishEffects;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipe;
@@ -23,15 +22,12 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -39,7 +35,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -47,7 +42,6 @@ import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -191,9 +185,9 @@ public class BlockCampfire extends AbstractCampfire
 
     @Nonnull
     @Override
-    public ItemStack getItem(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
-        final ICampfireType type = ICampfireType.get(worldIn.getTileEntity(pos));
-        final ItemStack stack = super.getItem(worldIn, pos, state);
+    public ItemStack getItem(@Nonnull IBlockState state, @Nullable TileEntity tile) {
+        final ICampfireType type = ICampfireType.get(tile);
+        final ItemStack stack = super.getItem(state, tile);
 
         return type != null ? ItemCampfire.applyType(stack, type.get()) : stack;
     }
@@ -205,37 +199,6 @@ public class BlockCampfire extends AbstractCampfire
             ((TileEntityCampfire)tile).dropAllItems();
 
         super.breakBlock(worldIn, pos, state);
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public void harvestBlock(@Nonnull World worldIn, @Nonnull EntityPlayer player, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nullable TileEntity te, @Nonnull ItemStack stack) {
-        final ICampfireType type = ICampfireType.get(te);
-        if(type == null) {
-            super.harvestBlock(worldIn, player, pos, state, te, stack);
-            return;
-        }
-
-        player.addStat(StatList.getBlockStats(this));
-        player.addExhaustion(0.005f);
-
-        //ensure silk touch drop captures type stored in tile entity
-        if(canSilkHarvest(worldIn, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0) {
-            final List<ItemStack> drops = new ArrayList<>();
-
-            drops.add(ItemBlockColored.applyColor(ItemCampfire.applyType(this, type.get()), AbstractCampfireTE.getColor(te)));
-            ForgeEventFactory.fireBlockHarvesting(drops, worldIn, pos, state, 0, 1, true, player);
-
-            drops.forEach(drop -> spawnAsEntity(worldIn, pos, drop));
-        }
-
-        //old code for no silk touch
-        else {
-            harvesters.set(player);
-            final int fortune = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
-            dropBlockAsItem(worldIn, pos, state, fortune);
-            harvesters.set(null);
-        }
     }
 
     //===================

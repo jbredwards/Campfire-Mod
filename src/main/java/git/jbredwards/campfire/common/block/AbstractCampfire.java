@@ -1,5 +1,6 @@
 package git.jbredwards.campfire.common.block;
 
+import com.google.common.collect.Lists;
 import git.jbredwards.campfire.Campfire;
 import git.jbredwards.campfire.client.particle.ParticleCampfireSmoke;
 import git.jbredwards.campfire.client.particle.ParticleColoredLava;
@@ -71,7 +72,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -157,9 +157,6 @@ public abstract class AbstractCampfire extends Block implements ITileEntityProvi
     //HANDLE ITEMS
     //============
 
-    @Override
-    protected boolean canSilkHarvest() { return true; }
-
     @Nonnull
     @Override
     public IBlockState getStateForPlacement(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull EnumFacing facing, float hitX, float hitY, float hitZ, int meta, @Nonnull EntityLivingBase placer) {
@@ -178,20 +175,31 @@ public abstract class AbstractCampfire extends Block implements ITileEntityProvi
         }
     }
 
+    @Override
+    protected boolean canSilkHarvest() { return true; }
+
+    @Nonnull
+    @Override
+    protected ItemStack getSilkTouchDrop(@Nonnull IBlockState state) {
+        return new ItemStack(this, 1, state.getValue(LIT) ? 0 : 1); //apply color through AbstractCampfire#getItem
+    }
+
     @Nonnull
     @Override
     public ItemStack getItem(@Nonnull World worldIn, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
-        final @Nullable TileEntity tile = worldIn.getTileEntity(pos);
-        final ItemStack stack = new ItemStack(this, 1, state.getValue(LIT) ? 0 : 1);
+        return getItem(state, worldIn.getTileEntity(pos));
+    }
 
-        return tile instanceof AbstractCampfireTE ? ItemBlockColored.applyColor(stack, AbstractCampfireTE.getColor(tile)) : stack;
+    @Nonnull
+    public ItemStack getItem(@Nonnull IBlockState state, @Nullable TileEntity tile) {
+        return ItemBlockColored.applyColor(getSilkTouchDrop(state), AbstractCampfireTE.getColor(tile));
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public void harvestBlock(@Nonnull World worldIn, @Nonnull EntityPlayer player, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nullable TileEntity te, @Nonnull ItemStack stack) {
-        if(!(te instanceof AbstractCampfireTE)) {
-            super.harvestBlock(worldIn, player, pos, state, te, stack);
+    public void harvestBlock(@Nonnull World worldIn, @Nonnull EntityPlayer player, @Nonnull BlockPos pos, @Nonnull IBlockState state, @Nullable TileEntity tile, @Nonnull ItemStack stack) {
+        if(!(tile instanceof AbstractCampfireTE)) {
+            super.harvestBlock(worldIn, player, pos, state, tile, stack);
             return;
         }
 
@@ -200,8 +208,7 @@ public abstract class AbstractCampfire extends Block implements ITileEntityProvi
 
         //ensure silk touch drop captures type stored in tile entity
         if(canSilkHarvest(worldIn, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0) {
-            final List<ItemStack> drops = new ArrayList<>();
-            drops.add(ItemBlockColored.applyColor(new ItemStack(this, 1, state.getValue(LIT) ? 0 : 1), AbstractCampfireTE.getColor(te)));
+            final List<ItemStack> drops = Lists.newArrayList(getItem(state, tile));
             ForgeEventFactory.fireBlockHarvesting(drops, worldIn, pos, state, 0, 1, true, player);
             drops.forEach(drop -> spawnAsEntity(worldIn, pos, drop));
         }

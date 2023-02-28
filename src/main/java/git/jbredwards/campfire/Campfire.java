@@ -30,7 +30,7 @@ import javax.annotation.Nonnull;
  * @author jbred
  *
  */
-@Mod(modid = "campfire", name = "Campfire", version = "1.1.1")
+@Mod(modid = "campfire", name = "Campfire", version = "1.1.2")
 public final class Campfire
 {
     public static final boolean isFluidloggedAPI = Loader.isModLoaded("fluidlogged_api");

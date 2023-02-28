@@ -11,7 +11,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven-publish'
 
-version = 'v1.1.1-mc1.12.2'
+version = 'v1.1.2-mc1.12.2'
 group = 'git.jbredwards.campfire'
 archivesBaseName = 'Campfire'
 sourceCompatibility = targetCompatibility = '1.8'
