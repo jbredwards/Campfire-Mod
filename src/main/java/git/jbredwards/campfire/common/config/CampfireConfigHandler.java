@@ -65,6 +65,10 @@ public final class CampfireConfigHandler
     @Config.LangKey("config.campfire.unlitOnCraft")
     public static boolean unlitOnCraft = false;
 
+    @Config.RequiresMcRestart
+    @Config.LangKey(("config.campfire.useFurnaceFoodRecipes"))
+    public static boolean useFurnaceFoodRecipes = true;
+
     @Config.RangeInt(min = 0)
     @Config.LangKey("config.campfire.brazierBurnOut")
     public static int brazierBurnOut = 0;
@@ -73,8 +77,9 @@ public final class CampfireConfigHandler
     @Config.LangKey("config.campfire.campfireBurnOut")
     public static int campfireBurnOut = 0;
 
+    @Nonnull
     @Config.LangKey("config.campfire.poweredAction")
-    @Nonnull public static PoweredAction poweredAction = PoweredAction.COLOR;
+    public static PoweredAction poweredAction = PoweredAction.COLOR;
 
     @Nonnull
     static final List<ItemStack> TYPES = new ArrayList<>();
@@ -119,7 +124,7 @@ public final class CampfireConfigHandler
     @SuppressWarnings("UnstableApiUsage")
     public static void buildRecipes() {
         //autogenerate campfire recipes based on furnace food recipes
-        FurnaceRecipes.instance().getSmeltingList().forEach((in, out) -> {
+        if(useFurnaceFoodRecipes) FurnaceRecipes.instance().getSmeltingList().forEach((in, out) -> {
             if(in.getItem() instanceof ItemFood && out.getItem() instanceof ItemFood) {
                 CampfireRecipeHandler.createRecipe(Lists.newArrayList(in), out, 400, FurnaceRecipes.instance().getSmeltingExperience(out));
             }

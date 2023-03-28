@@ -39,3 +39,5 @@ config.campfire.resetDyeOnExtinguish=Extinguish Resets Color
 config.campfire.resetDyeOnExtinguish.tooltip=Igniting a previously extinguished brazier or campfire will reset its previous fire color back to the default one.
 config.campfire.unlitOnCraft=Unlit On Craft
 config.campfire.unlitOnCraft.tooltip=When a brazier or campfire is initially crafted, it will be extinguished.
+config.campfire.useFurnaceFoodRecipes=Generate Default Campfire Recipes
+config.campfire.useFurnaceFoodRecipes.tooltip=Automatically generate default campfire recipes from furnace food recipes.
