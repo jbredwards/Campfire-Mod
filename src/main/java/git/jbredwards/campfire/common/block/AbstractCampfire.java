@@ -471,23 +471,27 @@ public abstract class AbstractCampfire extends Block implements ITileEntityProvi
 
     @SideOnly(Side.CLIENT)
     public void addParticles(@Nonnull World world, @Nonnull BlockPos pos, int smokeColor, int fallbackColor, boolean forceCampfireParticles, boolean isSignal, boolean isPowered, double extraSmokeOffset) {
-        if(isSmokey() || forceCampfireParticles) {
-            //campfire smoke
-            if(!isPowered || CampfireConfigHandler.poweredAction != CampfireConfigHandler.PoweredAction.DISABLE) {
-                final double x = pos.getX() + 0.5 + world.rand.nextDouble() / 3 * (world.rand.nextBoolean() ? 1 : -1);
-                final double y = pos.getY() + world.rand.nextDouble() + world.rand.nextDouble();
-                final double z = pos.getZ() + 0.5 + world.rand.nextDouble() / 3 * (world.rand.nextBoolean() ? 1 : -1);
+        if((isSmokey() || forceCampfireParticles)) {
+            //fix issue#7 (Smoke particles can leak into other dimensions)
+            final EntityPlayer player = Minecraft.getMinecraft().player;
+            if(player != null && player.dimension == world.provider.getDimension()) {
+                //campfire smoke
+                if(!isPowered || CampfireConfigHandler.poweredAction != CampfireConfigHandler.PoweredAction.DISABLE) {
+                    final double x = pos.getX() + 0.5 + world.rand.nextDouble() / 3 * (world.rand.nextBoolean() ? 1 : -1);
+                    final double y = pos.getY() + world.rand.nextDouble() + world.rand.nextDouble();
+                    final double z = pos.getZ() + 0.5 + world.rand.nextDouble() / 3 * (world.rand.nextBoolean() ? 1 : -1);
 
-                final int color = isPowered ? smokeColor : fallbackColor;
-                ParticleCampfireSmoke.spawnParticle(world, x, y, z, 0, 0.07, 0, isSignal, !isPowered && color != -1, color);
-            }
+                    final int color = isPowered ? smokeColor : fallbackColor;
+                    ParticleCampfireSmoke.spawnParticle(world, x, y, z, 0, 0.07, 0, isSignal, !isPowered && color != -1, color);
+                }
 
-            //extinguish smoke
-            if(extraSmokeOffset >= 0 && isSmokey()) {
-                final double x = pos.getX() + 0.25 + world.rand.nextDouble() / 2;
-                final double y = pos.getY() + extraSmokeOffset;
-                final double z = pos.getZ() + 0.25 + world.rand.nextDouble() / 2;
-                world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, x, y, z, 0, 0.005, 0);
+                //extinguish smoke
+                if(extraSmokeOffset >= 0 && isSmokey()) {
+                    final double x = pos.getX() + 0.25 + world.rand.nextDouble() / 2;
+                    final double y = pos.getY() + extraSmokeOffset;
+                    final double z = pos.getZ() + 0.25 + world.rand.nextDouble() / 2;
+                    world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, x, y, z, 0, 0.005, 0);
+                }
             }
         }
     }
