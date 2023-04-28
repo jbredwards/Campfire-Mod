@@ -35,7 +35,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -43,6 +42,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -243,10 +243,12 @@ public class BlockCampfire extends AbstractCampfire
                     return true;
                 }
 
-                //insert item into campfire
+                //put item onto campfire
                 if(!slot.isActive || stack.isEmpty()) return false;
-                else if(!world.isRemote) {
-                    getRecipeFromInput(stack, type.get()).ifPresent(campfireRecipe -> {
+                final Optional<CampfireRecipe> recipe = getRecipeFromInput(stack, type.get());
+                if(!recipe.isPresent() && CampfireConfigHandler.recipeItemsOnCampfireOnly) return false;
+                if(!world.isRemote) {
+                    recipe.ifPresent(campfireRecipe -> {
                         slot.output = campfireRecipe.output;
                         slot.maxCookTime = campfireRecipe.cookTime;
                         slot.experience = campfireRecipe.experience;
@@ -266,7 +268,7 @@ public class BlockCampfire extends AbstractCampfire
     }
 
     @Nonnull
-    protected java.util.Optional<CampfireRecipe> getRecipeFromInput(@Nonnull ItemStack stack, @Nonnull ItemStack type) {
+    protected Optional<CampfireRecipe> getRecipeFromInput(@Nonnull ItemStack stack, @Nonnull ItemStack type) {
         return CampfireRecipeHandler.getFromInput(stack, type);
     }
 
@@ -302,7 +304,7 @@ public class BlockCampfire extends AbstractCampfire
     //FLUIDLOGGED API INTEGRATION
     //===========================
 
-    @Optional.Method(modid = "fluidlogged_api")
+    @net.minecraftforge.fml.common.Optional.Method(modid = "fluidlogged_api")
     @Nonnull
     @Override
     public EnumActionResult onFluidFill(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState here, @Nonnull FluidState newFluid, int blockFlags) {

@@ -1,7 +1,7 @@
 //blocks
 tile.campfire.brazier.name=Brazier
 tile.campfire.campfire.name=Campfire
-tile.campfire.campfire_ash.name=Ash
+tile.campfire.campfire_ash.name=Layer of Ashes
 //regex
 regex.campfire.target=$
 regex.campfire.replacement= Campfire
@@ -35,6 +35,8 @@ config.campfire.isCampfireBurningBlock=Campfires Burn Entities
 config.campfire.isCampfireBurningBlock.tooltip=Campfires burn entities.
 config.campfire.poweredAction=Redstone Powered Action
 config.campfire.poweredAction.tooltip=Controls what this does while powered: (IGNORE = emited smoke is the default color; COLOR = emited smoke is the same color as the block below (map color); DISABLE = no smoke is emited)
+config.campfire.recipeItemsOnCampfireOnly=Recipe Items on Campfires Only
+config.campfire.recipeItemsOnCampfireOnly.tooltip=Whether only recipe items can be placed on Campfires.
 config.campfire.resetDyeOnExtinguish=Extinguish Resets Color
 config.campfire.resetDyeOnExtinguish.tooltip=Igniting a previously extinguished brazier or campfire will reset its previous fire color back to the default one.
 config.campfire.unlitOnCraft=Unlit On Craft

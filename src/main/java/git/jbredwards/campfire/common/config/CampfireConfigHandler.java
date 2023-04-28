@@ -59,6 +59,9 @@ public final class CampfireConfigHandler
     @Config.LangKey("config.campfire.isCampfireBurningBlock")
     public static boolean isCampfireBurningBlock = true;
 
+    @Config.LangKey("config.campfire.recipeItemsOnCampfireOnly")
+    public static boolean recipeItemsOnCampfireOnly = true;
+
     @Config.LangKey("config.campfire.resetDyeOnExtinguish")
     public static boolean resetDyeOnExtinguish = true;
 
