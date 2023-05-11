@@ -4,14 +4,12 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.gson.*;
 import git.jbredwards.campfire.common.config.deserializer.CampfireRecipeDeserializer;
-import git.jbredwards.campfire.common.config.deserializer.ItemStackDeserializer;
+import git.jbredwards.campfire.common.config.deserializer.ItemStackListDeserializer;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipe;
 import git.jbredwards.campfire.common.recipe.campfire.CampfireRecipeHandler;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
-import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -94,7 +92,7 @@ public final class CampfireConfigHandler
     public static void buildTypes() {
         final List<ItemStack> types = new ArrayList<>();
         //autogenerate initial campfire logs based on oredict
-        OreDictionary.getOres("logWood").forEach(stack -> addNonDuplicateStack(types, stack));
+        addNonDuplicateStacks(types, ItemStackListDeserializer.getSubTypes(OreDictionary.getOres("logWood")));
 
         //per-mod types config
         Loader.instance().getIndexedModList().keySet().forEach(modid -> {
@@ -161,16 +159,16 @@ public final class CampfireConfigHandler
         //whitelist
         if(logs.has("add")) {
             final List<ItemStack> add = new ArrayList<>();
-            logs.getAsJsonArray("add").forEach(element -> addNonDuplicateStack(add,
-                    ItemStackDeserializer.INSTANCE.deserialize(element, null, null)));
+            logs.getAsJsonArray("add").forEach(element -> addNonDuplicateStacks(add,
+                    ItemStackListDeserializer.INSTANCE.deserialize(element, null, null)));
             add.removeIf(stack -> isStackInList(types, stack));
             types.addAll(add);
         }
         //blacklist
         if(logs.has("remove")) {
             final List<ItemStack> remove = new ArrayList<>();
-            logs.getAsJsonArray("remove").forEach(element -> addNonDuplicateStack(remove,
-                    ItemStackDeserializer.INSTANCE.deserialize(element, null, null)));
+            logs.getAsJsonArray("remove").forEach(element -> addNonDuplicateStacks(remove,
+                    ItemStackListDeserializer.INSTANCE.deserialize(element, null, null)));
             types.removeIf(stack -> isStackInList(remove, stack));
         }
     }
@@ -189,15 +187,15 @@ public final class CampfireConfigHandler
             //only one recipe to remove
             if(removeElement.isJsonObject()) {
                 final JsonObject remove = removeElement.getAsJsonObject();
-                if(remove.has("input")) removeInput.accept(ItemStackDeserializer.INSTANCE.deserialize(remove.get("input"), null, null));
-                else if(remove.has("output")) removeOutput.accept(ItemStackDeserializer.INSTANCE.deserialize(remove.get("output"), null, null));
+                if(remove.has("input")) ItemStackListDeserializer.INSTANCE.deserialize(remove.get("input"), null, null).forEach(removeInput);
+                else if(remove.has("output")) ItemStackListDeserializer.INSTANCE.deserialize(remove.get("output"), null, null).forEach(removeOutput);
             }
             //multiple recipes to remove
             else removeElement.getAsJsonArray().forEach(element -> {
                 if(element.isJsonObject()) {
                     final JsonObject remove = element.getAsJsonObject();
-                    if(remove.has("input")) removeInput.accept(ItemStackDeserializer.INSTANCE.deserialize(remove.get("input"), null, null));
-                    else if(remove.has("output")) removeOutput.accept(ItemStackDeserializer.INSTANCE.deserialize(remove.get("output"), null, null));
+                    if(remove.has("input")) ItemStackListDeserializer.INSTANCE.deserialize(remove.get("input"), null, null).forEach(removeInput);
+                    else if(remove.has("output")) ItemStackListDeserializer.INSTANCE.deserialize(remove.get("output"), null, null).forEach(removeOutput);
                 }
             });
         }
@@ -209,19 +207,8 @@ public final class CampfireConfigHandler
         }
     }
 
-    static void addNonDuplicateStack(@Nonnull List<ItemStack> stacks, @Nonnull ItemStack stack) {
-        if(!stack.isEmpty()) {
-            if(stack.getMetadata() != OreDictionary.WILDCARD_VALUE) {
-                if(!isStackInList(stacks, stack)) stacks.add(stack);
-            }
-            else {
-                final NonNullList<ItemStack> tabItems = NonNullList.create();
-                stack.getItem().getSubItems(CreativeTabs.SEARCH, tabItems);
-                tabItems.forEach(tabItem -> {
-                    if(!isStackInList(stacks, tabItem)) stacks.add(tabItem);
-                });
-            }
-        }
+    static void addNonDuplicateStacks(@Nonnull List<ItemStack> stacks, @Nonnull List<ItemStack> toAdd) {
+        toAdd.forEach(stack -> { if(!isStackInList(stacks, stack)) stacks.add(stack); });
     }
 
     public static boolean isStackInList(@Nonnull List<ItemStack> stacks, @Nonnull ItemStack toCompare) {

@@ -29,32 +29,22 @@ public enum CampfireRecipeDeserializer implements JsonDeserializer<CampfireRecip
         //gather inputs
         final List<ItemStack> inputs = new ArrayList<>();
         final JsonElement inputsElement = json.get("inputs");
-        if(inputsElement.isJsonObject()) {
-            final ItemStack stack = ItemStackDeserializer.INSTANCE.deserialize(inputsElement, null, null);
-            if(!stack.isEmpty()) inputs.add(stack);
-        }
-        else for(JsonElement element : inputsElement.getAsJsonArray()) {
-            final ItemStack stack = ItemStackDeserializer.INSTANCE.deserialize(element, null, null);
-            if(!stack.isEmpty()) inputs.add(stack);
-        }
+        if(inputsElement.isJsonObject()) inputs.addAll(ItemStackListDeserializer.INSTANCE.deserialize(inputsElement, null, null));
+        else for(JsonElement element : inputsElement.getAsJsonArray()) inputs.addAll(ItemStackListDeserializer.INSTANCE.deserialize(element, null, null));
 
-        final ItemStack output = ItemStackDeserializer.INSTANCE.deserialize(json.get("output"), null, null);
+        final List<ItemStack> outputs = ItemStackListDeserializer.INSTANCE.deserialize(json.get("output"), null, null);
+        if(outputs.size() != 1) throw new IllegalArgumentException("The output for the recipe must be exactly one item!: " + outputs);
+
         final float experience = json.has("experience") ? json.getAsJsonPrimitive("experience").getAsFloat() : 0;
         final int cookTime = json.has("cookTime") ? json.getAsJsonPrimitive("cookTime").getAsInt() : 400;
-        if(!json.has("campfireTypes")) return CampfireRecipe.of(inputs, output, cookTime, experience);
+        if(!json.has("campfireTypes")) return CampfireRecipe.of(inputs, outputs.get(0), cookTime, experience);
 
         //gather campfire types
         final List<ItemStack> campfireTypes = new ArrayList<>();
         final JsonElement campfireTypesElement = json.get("campfireTypes");
-        if(campfireTypesElement.isJsonObject()) {
-            final ItemStack stack = ItemStackDeserializer.INSTANCE.deserialize(campfireTypesElement, null, null);
-            if(!stack.isEmpty()) campfireTypes.add(stack);
-        }
-        else for(JsonElement element : campfireTypesElement.getAsJsonArray()) {
-            final ItemStack stack = ItemStackDeserializer.INSTANCE.deserialize(element, null, null);
-            if(!stack.isEmpty()) campfireTypes.add(stack);
-        }
+        if(campfireTypesElement.isJsonObject()) campfireTypes.addAll(ItemStackListDeserializer.INSTANCE.deserialize(campfireTypesElement, null, null));
+        else for(JsonElement element : campfireTypesElement.getAsJsonArray()) campfireTypes.addAll(ItemStackListDeserializer.INSTANCE.deserialize(element, null, null));
 
-        return CampfireRecipe.of(campfireTypes, inputs, output, cookTime, experience);
+        return CampfireRecipe.of(campfireTypes, inputs, outputs.get(0), cookTime, experience);
     }
 }
