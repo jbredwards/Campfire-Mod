@@ -11,7 +11,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven-publish'
 
-version = 'v1.1.6-mc1.12.2'
+version = "v${mod_version}-mc1.12.2"
 group = 'git.jbredwards.campfire'
 archivesBaseName = 'Campfire'
 sourceCompatibility = targetCompatibility = '1.8'
@@ -24,40 +24,55 @@ minecraft {
 }
 
 dependencies {
-    deobfCompile "com.github.jbredwards:fluidlogged-api:${fluidlogged_api_version}"
-    deobfCompile "com.github.TehNut-Mods:HWYLA:${hwyla_version}"
-    deobfCompile "mezz.jei:jei_1.12.2:${jei_version}"
-
+    // blamejared
+    deobfProvided 'com.teamacronymcoders:ContentTweaker:1.12.2-4.10.0-Snapshot.30'
+    deobfProvided "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.700"
+    deobfProvided 'vazkii.autoreglib:AutoRegLib:1.3-32.+'
+    deobfProvided 'vazkii.quark:Quark:r1.6-180.7'
+    // cleanroom
+    deobfCompile 'com.cleanroommc:assetmover:2.5'
+    // curseforge repos
     deobfProvided 'ex-nihilo-creatio:exnihilocreatio:1.12:0.3.2'
+    deobfProvided 'albedo:albedo:1.12.2:1.1.0'
+    deobfProvided 'nuclearcraft-mod:nuclearcraft:1.12.2:2.19'
+    // modmaven
+    deobfCompile "mezz.jei:jei_1.12.2:${jei_version}"
+    deobfProvided 'slimeknights.mantle:Mantle:1.12-1.3.3.55'
+    deobfProvided 'slimeknights:TConstruct:1.12.2-2.13.0.184'
+    //tterrag
+    // deobfProvided 'mcjty.theoneprobe:TheOneProbe-1.12:1.12-1.4.28-17'
+    // modrinth repos
+    deobfCompile "maven.modrinth:hwyla:${hwyla_version}"
+    deobfProvided "maven.modrinth:fluidlogged-api:${fluidlogged_api_version}"
+    deobfProvided "maven.modrinth:future-mc:${future_mc_version}"
+    deobfProvided "maven.modrinth:groovyscript:${groovyscript_version}"
+    deobfProvided "maven.modrinth:piston-api:${piston_api_version}"
 }
 
 repositories {
-    maven { url 'https://jitpack.io' }
+    maven { url 'https://api.modrinth.com/maven' }
+    maven { url 'https://maven.blamejared.com' }
+    maven { url 'https://maven.cleanroommc.com' }
+    maven { url 'https://maven.shadowfacts.net' }
+    // maven { url 'https://maven.tehnut.info' }
+    // maven { url 'https://maven.tterrag.com' }
+    maven { url 'https://minecraft.curseforge.com/api/maven' }
     maven {
-        //location of the maven that hosts JEI files
-        name = 'Progwml6 maven'
-        url = 'http://dvs1.progwml6.com/files/maven'
+        name = 'DVS1 Maven FS'
+        url = 'https://dvs1.progwml6.com/files/maven'
     }
-    maven {
-        //location of a maven mirror for JEI files, as a fallback
-        name = 'ModMaven'
-        url = 'modmaven.k-4u.nl'
-    }
-    //ex nihilo
-    maven { url 'https://minecraft.curseforge.com/api/maven/' }
 }
 
 processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
+    inputs.property "mod_version", project.mod_version
 
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-                
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
+        expand 'version':project.version, 'mcversion':project.minecraft.version, 'mod_version':project.mod_version
     }
         
     // copy everything else except the mcmod.info
@@ -95,7 +110,7 @@ publishing {
 jar {
     manifest {
         attributes(
-                'FMLCorePlugin': 'git.jbredwards.campfire.asm.ASMHandler',
+                'FMLCorePlugin': 'git.jbredwards.campfire.mod.asm.ASMHandler',
                 'FMLCorePluginContainsFMLMod': 'true',
                 'FMLAT':'campfire_at.cfg'
         )
@@ -103,5 +118,5 @@ jar {
 }
 
 //for applying asm with intellij
-runClient { jvmArgs '-Dfml.coreMods.load=git.jbredwards.campfire.asm.ASMHandler' }
-runServer { jvmArgs '-Dfml.coreMods.load=git.jbredwards.campfire.asm.ASMHandler' }
+runClient { jvmArgs '-Dfml.coreMods.load=git.jbredwards.campfire.mod.asm.ASMHandler' }
+runServer { jvmArgs '-Dfml.coreMods.load=git.jbredwards.campfire.mod.asm.ASMHandler' }

@@ -1,0 +1,63 @@
+{
+	"credit": "Made with Blockbench",
+	"textures": {
+		"chain": "campfire:items/chain"
+	},
+	"elements": [
+		{
+			"from": [6.5, 12, -3],
+			"to": [9.5, 12, 8.9063],
+			"shade": false,
+			"rotation": {"angle": -22.5, "axis": "x", "origin": [8, 12, -3]},
+			"faces": {
+				"up": {"uv": [6, 3, 9, 15], "rotation": 180, "texture": "#chain"},
+				"down": {"uv": [6, 3, 9, 15], "texture": "#chain"}
+			}
+		},
+		{
+			"from": [6.5, 12, 7.0937],
+			"to": [9.5, 12, 19],
+			"shade": false,
+			"rotation": {"angle": 22.5, "axis": "x", "origin": [8, 12, 19]},
+			"faces": {
+				"up": {"uv": [6, 3, 9, 15], "texture": "#chain"},
+				"down": {"uv": [6, 3, 9, 15], "rotation": 180, "texture": "#chain"}
+			}
+		},
+		{
+			"from": [-3, 12, 6.5],
+			"to": [8.9063, 12, 9.5],
+			"shade": false,
+			"rotation": {"angle": 22.5, "axis": "z", "origin": [-3, 12, 8]},
+			"faces": {
+				"up": {"uv": [6, 3, 9, 15], "rotation": 90, "texture": "#chain"},
+				"down": {"uv": [6, 3, 9, 15], "rotation": 90, "texture": "#chain"}
+			}
+		},
+		{
+			"from": [7.0937, 12, 6.5],
+			"to": [19, 12, 9.5],
+			"shade": false,
+			"rotation": {"angle": -22.5, "axis": "z", "origin": [19, 12, 8]},
+			"faces": {
+				"up": {"uv": [6, 3, 9, 15], "rotation": 270, "texture": "#chain"},
+				"down": {"uv": [6, 3, 9, 15], "rotation": 270, "texture": "#chain"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "base",
+			"origin": [0, 0, 0],
+			"color": 0,
+			"children": [
+				{
+					"name": "chains",
+					"origin": [0, 0, 0],
+					"color": 0,
+					"children": [2, 3, 4, 5]
+				}
+			]
+		}
+	]
+}

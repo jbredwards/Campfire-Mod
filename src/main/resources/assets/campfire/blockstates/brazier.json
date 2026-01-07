@@ -5,7 +5,7 @@
         "textures":{
             "ash":"campfire:blocks/campfire_ash",
             "ash_lit":"campfire:blocks/brazier_ash_lit",
-            "bottom":"blocks/anvil_base",
+            "bottom":"campfire:blocks/brazier_cage_bottom",
             "cage":"campfire:blocks/brazier_cage",
             "fire":"campfire:blocks/campfire_fire",
 		    "particle":"#cage"
@@ -26,11 +26,19 @@
                 "ash":[{"model":"campfire:brazier_ash"}],
                 "cage":[{"model":"campfire:brazier_cage"}],
                 "fire":[{
-                    "model":"campfire:brazier_fire_builtin",
+                    "model":"campfire:colored_builtin",
                     "custom":{
                         "parent":"campfire:brazier#fire",
-                        "coloredFire":"campfire:blocks/campfire_fire_colored",
-                        "coloredAsh":"campfire:blocks/brazier_ash_lit_colored"
+                        "colorKeys":[
+                            {
+                                "tint":5,
+                                "texture":"campfire:blocks/campfire_fire_colored"
+                            },
+                            {
+                                "tint":6,
+                                "texture":"campfire:blocks/brazier_ash_lit_colored"
+                            }
+                        ]
                     }
                 }]
             }
@@ -59,6 +67,20 @@
                 }
             }
         },
+        "hanging":{
+            "false":{},
+            "true":{
+                "submodel":{
+                    "hanging":[{
+                        "model":"forge:multi-layer",
+                        "custom":{
+                            "Solid":"campfire:brazier#air",
+                            "Cutout":"campfire:brazier#hanging_cutout"
+                        }
+                    }]
+                }
+            }
+        },
         "signal":{
             "false":{},
             "true":{}
@@ -67,19 +89,32 @@
             "false":{},
             "true":{}
         },
+        "hanging_cutout":[{
+            "model":"campfire:brazier_cage_hanging",
+            "transform":{"rotation":[0, 45, 0]}
+        }],
         "lit_cutout":[{
             "submodel":{
                 "cage":[{"model":"campfire:brazier_cage"}],
                 "fire":[{
-                    "model":"campfire:brazier_fire_builtin",
+                    "model":"campfire:colored_builtin",
                     "custom":{
                         "parent":"campfire:brazier#fire",
-                        "coloredFire":"campfire:blocks/campfire_fire_colored",
-                        "coloredAsh":"campfire:blocks/brazier_ash_lit_colored"
+                        "colorKeys":[
+                            {
+                                "tint":5,
+                                "texture":"campfire:blocks/campfire_fire_colored"
+                            },
+                            {
+                                "tint":6,
+                                "texture":"campfire:blocks/brazier_ash_lit_colored"
+                            }
+                        ]
                     }
                 }]
             }
         }],
+        "air":[{"model":"block"}],
         "ash":[{"model":"campfire:brazier_ash"}],
         "cage":[{"model":"campfire:brazier_cage"}],
         "fire":[{"model":"campfire:brazier_fire"}]

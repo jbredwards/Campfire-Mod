@@ -30,11 +30,19 @@
                     "custom":{"parent":"campfire:campfire#logs"}
                 }],
                 "cutout":[{
-                    "model":"campfire:campfire_fire_builtin",
+                    "model":"campfire:colored_builtin",
                     "custom":{
                         "parent":"campfire:campfire#cutout_layer",
-                        "coloredFire":"campfire:blocks/campfire_fire_colored",
-                        "coloredAsh":"campfire:blocks/campfire_ash_lit_colored"
+                        "colorKeys":[
+                            {
+                                "tint":5,
+                                "texture":"campfire:blocks/campfire_fire_colored"
+                            },
+                            {
+                                "tint":6,
+                                "texture":"campfire:blocks/campfire_ash_lit_colored"
+                            }
+                        ]
                     }
                 }]
             }
@@ -89,11 +97,19 @@
             }
         }],
         "lit_cutout":[{
-            "model":"campfire:campfire_fire_builtin",
+            "model":"campfire:colored_builtin",
             "custom":{
                 "parent":"campfire:campfire#cutout_layer",
-                "coloredFire":"campfire:blocks/campfire_fire_colored",
-                "coloredAsh":"campfire:blocks/campfire_ash_lit_colored"
+                "colorKeys":[
+                    {
+                        "tint":5,
+                        "texture":"campfire:blocks/campfire_fire_colored"
+                    },
+                    {
+                        "tint":6,
+                        "texture":"campfire:blocks/campfire_ash_lit_colored"
+                    }
+                ]
             }
         }],
         "cutout_layer":[{"model":"campfire:campfire_cutout_layer"}],

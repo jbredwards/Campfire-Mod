@@ -6,7 +6,7 @@ tile.campfire.campfire_ash.name=Ceniza
 regex.campfire.target=$
 regex.campfire.replacement= Fogata
 //subtitles
-subtitles.campfire.crackle=Fogata crepita
+subtitles.campfire.campfire.crackle=Fogata crepita
 //futuremc
 tooltip.campfire.futuremc.deprecated=Este ítem está obsoleto!
 //jei

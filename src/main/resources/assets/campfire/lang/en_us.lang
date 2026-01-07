@@ -1,30 +1,50 @@
-//blocks
+# blocks
 tile.campfire.brazier.name=Brazier
 tile.campfire.campfire.name=Campfire
 tile.campfire.campfire_ash.name=Layer of Ashes
-//regex
+tile.campfire.chain.name=Chain
+tile.campfire.lantern.name=Lantern
+# regex
 regex.campfire.target=$
 regex.campfire.replacement= Campfire
-//subtitles
-subtitles.campfire.crackle=Campfire crackles
-//futuremc
-tooltip.campfire.futuremc.deprecated=This item is deprecated!
-//jei
+# subtitles
+subtitles.campfire.brazier.crackle=Brazier crackles
+subtitles.campfire.campfire.crackle=Campfire crackles
+# gui
+itemGroup.campfire.tab=Campfire
+tooltip.campfire.dyeable=Dyeable
+# jei
 gui.campfire.jei.category.campfire=Campfire
 gui.campfire.jei.category.campfire.cookTime=%s s
 gui.campfire.jei.category.campfire.experience=%s XP
 gui.campfire.jei.info.campfire_ash=Whenever a campfire completely burns out and destroys its logs, it leaves this behind.
-//config
+# waila
+campfire=Campfire
+option.campfire.showItems=Show Stored Campfire Items
+option.campfire.showProgress=Show Campfire Cooking Progress
+# config
+configgui.campfire.configTitle=Campfire Configuration
+configgui.campfire.enums.chainstone.disabled=Chainstone https://youtu.be/8UB0w8pbJ1Q
+campfire/brazier=Brazier Settings
+campfire/brazier.tooltip=Settings for brazier blocks.
+campfire/campfire=Campfire Settings
+campfire/campfire.tooltip=Settings for campfire blocks.
+campfire/chain=Chain Settings
+campfire/chain.tooltip=Settings for chain blocks.
 config.campfire.brazierBurnOut=Brazier Fire Strength
 config.campfire.brazierBurnOut.tooltip=The initial fire strength of a brazier. Each random block tick, the fire strength will tick down, once it reaches 0 the fire will be extinguished. Set the config to 0 to ignore this behavior (vanilla).
 config.campfire.brazierEmitsSmoke=Braziers Emit Smoke
 config.campfire.brazierEmitsSmoke.tooltip=Braziers emit smoke particles.
 config.campfire.campfireBurnOut=Campfire Fire Strength
 config.campfire.campfireBurnOut.tooltip=The initial fire strength of a campfire. Each random block tick, the fire strength will tick down, once it reaches 0 the fire (and logs) will be extinguished, leaving behind an ash pile. Set the config to 0 to ignore this behavior (vanilla).
+config.campfire.campfireAutomation=Campfire Automation
+config.campfire.campfireAutomation.tooltip=Allow blocks in the world (like hoppers or modded pipes) to extract and insert items into campfires.
 config.campfire.campfireAshEmitsParticles=Campfire Ashes Emit Particles
 config.campfire.campfireAshEmitsParticles.tooltip=Campfire ashes emit particles (campfire ash can be created by letting a campfire completely burn out, while that's enabled in this config).
 config.campfire.campfireEmitsSmoke=Campfires Emit Smoke
 config.campfire.campfireEmitsSmoke.tooltip=Campfires emit smoke particles.
+config.campfire.chainstone=Chainstone https://youtu.be/8UB0w8pbJ1Q
+config.campfire.chainstone.tooltip=While Piston API is installed, chains can connect to each other like slime blocks.
 config.campfire.doesSmokeFollowDye=Smoke Follows Dye
 config.campfire.doesSmokeFollowDye.tooltip=Smoke will be automatically dyed the same color as the block it's coming from.
 config.campfire.hasExtraSlots=Campfires Have Extra Slots
@@ -43,3 +63,5 @@ config.campfire.unlitOnCraft=Unlit On Craft
 config.campfire.unlitOnCraft.tooltip=When a brazier or campfire is initially crafted, it will be extinguished.
 config.campfire.useFurnaceFoodRecipes=Generate Default Campfire Recipes
 config.campfire.useFurnaceFoodRecipes.tooltip=Automatically generate default campfire recipes from furnace food recipes.
+true=True
+false=False
